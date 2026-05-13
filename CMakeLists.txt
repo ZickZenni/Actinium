@@ -12,15 +12,23 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
+add_subdirectory(thirdparty/uuid)
+
 add_executable(Actinium src/main.cpp
         src/core/application.cpp
         src/core/application.h
         src/core/main_window.cpp
-        src/core/main_window.h)
+        src/core/main_window.h
+        src/instance/instance.cpp
+        src/instance/instance.h
+        src/game/game.cpp
+        src/game/game.h)
 
 target_link_libraries(Actinium
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        uuid_v4::uuid_v4
 )
 
+target_include_directories(Actinium PRIVATE src/)

@@ -1,0 +1,3 @@
+[submodule "thirdparty/uuid"]
+	path = thirdparty/uuid
+	url = https://github.com/crashoz/uuid_v4
