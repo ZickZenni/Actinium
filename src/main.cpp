@@ -1,11 +1,12 @@
-#include <QApplication>
-#include <QPushButton>
+#include "core/application.h"
 
 int main(int argc, char* argv[])
 {
-    QApplication a(argc, argv);
-    QPushButton button("Hello world!", nullptr);
-    button.resize(200, 100);
-    button.show();
-    return QApplication::exec();
+    Actinium::GApp = new Actinium::Application(argc, argv);
+
+    const auto result = Actinium::GApp->Run();
+
+    delete Actinium::GApp;
+
+    return result;
 }

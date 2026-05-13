@@ -12,7 +12,11 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(Actinium src/main.cpp)
+add_executable(Actinium src/main.cpp
+        src/core/application.cpp
+        src/core/application.h
+        src/core/main_window.cpp
+        src/core/main_window.h)
 
 target_link_libraries(Actinium
         Qt::Core
