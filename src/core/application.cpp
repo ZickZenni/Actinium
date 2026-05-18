@@ -13,6 +13,7 @@ namespace Actinium
         setApplicationVersion("0.0.1");
 
         m_main_window = new MainWindow();
+        m_main_window->resize(1280, 720);
         m_main_window->show();
     }
 
