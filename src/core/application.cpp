@@ -1,5 +1,7 @@
 #include "application.h"
 
+#include <QScreen>
+
 namespace Actinium
 {
     Application::Application(int argc, char* argv[])
@@ -13,7 +15,14 @@ namespace Actinium
         setApplicationVersion("0.0.1");
 
         m_main_window = new MainWindow();
-        m_main_window->resize(1280, 720);
+
+        {
+            int width, height;
+            GetInitialWindowSize(width, height);
+
+            m_main_window->resize(width, height);
+        }
+
         m_main_window->show();
     }
 
@@ -25,5 +34,14 @@ namespace Actinium
     int Application::Run() const
     {
         return exec();
+    }
+
+    void Application::GetInitialWindowSize(int& out_width, int& out_height)
+    {
+        const auto primary_screen = primaryScreen();
+        const auto screen_size = primary_screen->size();
+
+        out_width = std::min(screen_size.width() - 20, 1280);
+        out_height = std::min(screen_size.height() - 90, 720);
     }
 }

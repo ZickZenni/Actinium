@@ -16,6 +16,8 @@ namespace Actinium
 
     private:
         MainWindow *m_main_window;
+
+        static void GetInitialWindowSize(int& out_width, int& out_height);
     };
 
     inline Application *GApp = nullptr;
