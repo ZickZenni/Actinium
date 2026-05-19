@@ -17,8 +17,8 @@ add_subdirectory(thirdparty/uuid)
 add_executable(Actinium src/main.cpp
         src/core/application.cpp
         src/core/application.h
-        src/core/main_window.cpp
-        src/core/main_window.h
+        src/ui/window/main_window.cpp
+        src/ui/window/main_window.h
         src/instance/instance.cpp
         src/instance/instance.h
         src/game/game.cpp
