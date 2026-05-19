@@ -1,6 +1,8 @@
 // ReSharper disable CppDFAMemoryLeak
 #include "create_instance_dialog.h"
 
+#include "core/application.h"
+
 #include <QLabel>
 #include <QPushButton>
 
@@ -41,9 +43,10 @@ namespace Actinium
             m_game_combo->setObjectName("GameField");
             m_game_combo->setPlaceholderText("Choose a Game");
 
-            m_game_combo->addItem("Genshin Impact");
-            m_game_combo->addItem("Honkai Star Rail");
-            m_game_combo->addItem("Zenless Zone Zero");
+            for (const auto& game : GAMES)
+            {
+                m_game_combo->addItem(QString::fromStdString(std::string(game.GetName())));
+            }
 
             auto* game_label = new QLabel("Game:");
             game_label->setObjectName("GameLabel");

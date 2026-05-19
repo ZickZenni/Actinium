@@ -21,7 +21,6 @@ add_executable(Actinium src/main.cpp
         src/ui/window/main_window.h
         src/instance/instance.cpp
         src/instance/instance.h
-        src/game/game.cpp
         src/game/game.h
         src/ui/dialog/create_instance_dialog.cpp
         src/ui/dialog/create_instance_dialog.h)
