@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QPushButton>
 
 namespace Actinium
 {
@@ -10,5 +11,10 @@ namespace Actinium
 
     public:
         explicit MainWindow(QWidget *widget = nullptr);
+
+    private:
+        QWidget* m_central_widget;
+
+        void CreateInstance();
     };
 }

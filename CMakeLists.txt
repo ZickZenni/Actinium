@@ -22,7 +22,9 @@ add_executable(Actinium src/main.cpp
         src/instance/instance.cpp
         src/instance/instance.h
         src/game/game.cpp
-        src/game/game.h)
+        src/game/game.h
+        src/ui/dialog/create_instance_dialog.cpp
+        src/ui/dialog/create_instance_dialog.h)
 
 target_link_libraries(Actinium
         Qt::Core
