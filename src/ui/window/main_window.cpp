@@ -26,12 +26,30 @@ namespace Actinium
 
     void MainWindow::CreateInstance()
     {
-        if (CreateInstanceDialog dialog; !dialog.exec())
+        CreateInstanceDialog dialog;
+
+        if (!dialog.exec())
         {
             return;
         }
 
-        std::cout << "[MainWindow] Success?" << std::endl;
+        const auto name_value = dialog.GetNameValue().toStdString();
+        const auto game_value = dialog.GetGameValue().toStdString();
+
+        if (name_value.empty())
+        {
+            std::cout << "[MainWindow::CreateInstance] User did not input a name" << std::endl;
+            return;
+        }
+
+        if (game_value.empty())
+        {
+            std::cout << "[MainWindow::CreateInstance] User did not input a game" << std::endl;
+            return;
+        }
+
+        std::cout << "[MainWindow::CreateInstance] Creating instance with name: " << name_value
+                  << " and game: " << game_value << std::endl;
     }
 }
 // ReSharper restore CppDFAMemoryLeak
