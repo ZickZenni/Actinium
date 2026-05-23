@@ -20,7 +20,7 @@ namespace Actinium
 
         [[nodiscard]] QString GetGameValue() const
         {
-            return m_game_combo->currentText();
+            return m_game_combo->currentData().value<QString>();
         }
 
     private:

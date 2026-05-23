@@ -11,10 +11,10 @@ namespace Actinium
     public:
         std::string name;
 
-        explicit Instance(Game *game, std::string name);
-        explicit Instance(Game *game, std::string name, const UUIDv4::UUID &uuid);
+        explicit Instance(const Game *game, std::string name);
+        explicit Instance(const Game *game, std::string name, const UUIDv4::UUID &uuid);
 
-        [[nodiscard]] Game *GetGame() const
+        [[nodiscard]] const Game *GetGame() const
         {
             return m_game;
         }
@@ -27,7 +27,7 @@ namespace Actinium
         static UUIDv4::UUID GenerateUUID();
 
     private:
-        Game *m_game;
+        const Game *m_game;
         UUIDv4::UUID m_uuid;
     };
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "game/game.h"
+#include "instance/instance.h"
 #include "ui/window/main_window.h"
 
 #include <QApplication>
@@ -21,7 +22,11 @@ namespace Actinium
 
         int Run() const;
 
+        void CreateInstance(const std::string &name, const std::string &game_id);
+
     private:
+        std::vector<Instance *> m_instances;
+
         MainWindow *m_main_window;
 
         static void GetInitialWindowSize(int &out_width, int &out_height);

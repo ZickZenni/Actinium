@@ -45,7 +45,10 @@ namespace Actinium
 
             for (const auto& game : GAMES)
             {
-                m_game_combo->addItem(QString::fromStdString(std::string(game.GetName())));
+                const auto name = QString::fromStdString(std::string(game.GetName()));
+                const auto id = QString::fromStdString(std::string(game.GetId()));
+
+                m_game_combo->addItem(name, id);
             }
 
             auto* game_label = new QLabel("Game:");

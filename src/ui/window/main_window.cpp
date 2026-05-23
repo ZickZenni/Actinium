@@ -1,6 +1,7 @@
 // ReSharper disable CppDFAMemoryLeak
 #include "main_window.h"
 
+#include "core/application.h"
 #include "ui/dialog/create_instance_dialog.h"
 
 #include <QPushButton>
@@ -8,8 +9,9 @@
 
 namespace Actinium
 {
-    MainWindow::MainWindow(QWidget* widget)
+    MainWindow::MainWindow(Application* app, QWidget* widget)
         : QMainWindow(widget)
+        , m_app(app)
     {
         setObjectName("MainWindow");
 
@@ -48,8 +50,7 @@ namespace Actinium
             return;
         }
 
-        std::cout << "[MainWindow::CreateInstance] Creating instance with name: " << name_value
-                  << " and game: " << game_value << std::endl;
+        m_app->CreateInstance(name_value, game_value);
     }
 }
 // ReSharper restore CppDFAMemoryLeak
