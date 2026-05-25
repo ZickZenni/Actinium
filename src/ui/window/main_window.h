@@ -12,13 +12,15 @@ namespace Actinium
         Q_OBJECT
 
     public:
-        explicit MainWindow(Application* app, QWidget *widget = nullptr);
+        explicit MainWindow(Application *app, QWidget *widget = nullptr);
 
     private:
-        Application* m_app;
+        Application *m_app;
 
-        QWidget* m_central_widget;
+        QWidget *m_central_widget;
 
-        void CreateInstance();
+        void PrepareToolBar();
+
+        void CreateInstance() const;
     };
 }

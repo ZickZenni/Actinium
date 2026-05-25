@@ -4,7 +4,7 @@
 #include "core/application.h"
 #include "ui/dialog/create_instance_dialog.h"
 
-#include <QPushButton>
+#include <QToolBar>
 #include <iostream>
 
 namespace Actinium
@@ -19,14 +19,21 @@ namespace Actinium
         m_central_widget->setObjectName("CentralWidget");
         setCentralWidget(m_central_widget);
 
-        const auto create_instance_button = new QPushButton("Create Instance", m_central_widget);
-        create_instance_button->setObjectName("CreateInstanceButton");
-        connect(create_instance_button, &QPushButton::clicked, this, &MainWindow::CreateInstance);
+        PrepareToolBar();
 
         QMetaObject::connectSlotsByName(this);
     }
 
-    void MainWindow::CreateInstance()
+    void MainWindow::PrepareToolBar()
+    {
+        const auto action_create_instance = new QAction(tr("&Create instance"), this);
+        connect(action_create_instance, &QAction::triggered, this, &MainWindow::CreateInstance);
+
+        const auto toolbar = addToolBar("MainToolbar");
+        toolbar->addAction(action_create_instance);
+    }
+
+    void MainWindow::CreateInstance() const
     {
         CreateInstanceDialog dialog;
 
