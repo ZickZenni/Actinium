@@ -41,11 +41,7 @@ namespace Actinium
 
     void Application::CreateInstance(const std::string& name, const std::string& game_id)
     {
-        const auto game = std::ranges::find_if(GAMES,
-            [&game_id](const auto& v)
-            {
-                return v.GetId() == game_id;
-            });
+        const auto game = GetGameById(game_id);
 
         if (game == GAMES.end())
         {
