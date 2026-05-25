@@ -64,7 +64,7 @@ namespace Actinium
 
         const auto game = Application::GetGameById(game_id.value());
 
-        if (game == GAMES.end())
+        if (game == nullptr)
         {
             SPDLOG_ERROR("Game with id '{}' does not exist", game_id.value());
             return nullptr;

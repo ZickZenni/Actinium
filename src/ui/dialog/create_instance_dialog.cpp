@@ -43,7 +43,7 @@ namespace Actinium
             m_game_combo->setObjectName("GameField");
             m_game_combo->setPlaceholderText("Choose a Game");
 
-            for (const auto& game : GAMES)
+            for (const auto& game : Application::GetSupportedGames())
             {
                 const auto name = QString::fromStdString(std::string(game.GetName()));
                 const auto id = QString::fromStdString(std::string(game.GetId()));

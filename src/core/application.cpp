@@ -69,11 +69,13 @@ namespace Actinium
 
     const Game* Application::GetGameById(const std::string& id)
     {
-        return std::ranges::find_if(GAMES,
+        const auto result = std::ranges::find_if(GAMES,
             [&id](const auto& v)
             {
                 return v.GetId() == id;
             });
+
+        return result != GAMES.end() ? result : nullptr;
     }
 
     void Application::LoadInstances()
