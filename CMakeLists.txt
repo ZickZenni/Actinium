@@ -13,6 +13,7 @@ find_package(Qt6 COMPONENTS
         REQUIRED)
 
 add_subdirectory(thirdparty/uuid)
+add_subdirectory(thirdparty/json)
 
 add_executable(Actinium src/main.cpp
         src/core/application.cpp
@@ -23,13 +24,15 @@ add_executable(Actinium src/main.cpp
         src/instance/instance.h
         src/game/game.h
         src/ui/dialog/create_instance_dialog.cpp
-        src/ui/dialog/create_instance_dialog.h)
+        src/ui/dialog/create_instance_dialog.h
+        src/util/json.h)
 
 target_link_libraries(Actinium
         Qt::Core
         Qt::Gui
         Qt::Widgets
         uuid_v4::uuid_v4
+        nlohmann_json
 )
 
 target_include_directories(Actinium PRIVATE src/)

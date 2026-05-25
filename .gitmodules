@@ -1,3 +1,6 @@
 [submodule "thirdparty/uuid"]
 	path = thirdparty/uuid
 	url = https://github.com/crashoz/uuid_v4
+[submodule "thirdparty/json"]
+	path = thirdparty/json
+	url = https://github.com/nlohmann/json.git

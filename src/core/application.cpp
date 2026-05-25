@@ -2,6 +2,8 @@
 
 #include <QMessageBox>
 #include <QScreen>
+#include <QStandardPaths>
+#include <filesystem>
 
 namespace Actinium
 {
@@ -15,25 +17,25 @@ namespace Actinium
         setApplicationDisplayName("Actinium");
         setApplicationVersion("0.0.1");
 
-        m_main_window = new MainWindow(this);
-
-        {
-            int width, height;
-            GetInitialWindowSize(width, height);
-
-            m_main_window->resize(width, height);
-        }
-
-        m_main_window->show();
+        CreatePaths();
+        LoadInstances();
+        PrepareUI();
     }
 
     Application::~Application()
     {
+        for (const auto& instance : m_instances)
+        {
+            delete instance;
+        }
+
         delete m_main_window;
     }
 
     int Application::Run() const
     {
+        m_main_window->show();
+
         return exec();
     }
 
@@ -47,14 +49,72 @@ namespace Actinium
 
         if (game == GAMES.end())
         {
-            QMessageBox::critical(m_main_window, "Internal Error", "The selected game was not found internally.", QMessageBox::Close);
+            QMessageBox::critical(
+                m_main_window, "Internal Error", "The selected game was not found internally.", QMessageBox::Close);
             return;
         }
 
         const auto instance = new Instance(game, name);
+        instance->Save();
+
         m_instances.push_back(instance);
 
         std::cout << "[Application::CreateInstance] Instance created" << std::endl;
+    }
+
+    std::filesystem::path Application::GetAppDataPath()
+    {
+        return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString();
+    }
+
+    const Game* Application::GetGameById(const std::string& id)
+    {
+        return std::ranges::find_if(GAMES,
+            [&id](const auto& v)
+            {
+                return v.GetId() == id;
+            });
+    }
+
+    void Application::LoadInstances()
+    {
+        const auto instances_path = GetAppDataPath() / "instances";
+        const auto entries = std::filesystem::directory_iterator(instances_path);
+
+        for (const auto& entry : entries)
+        {
+            if (!entry.is_directory())
+            {
+                continue;
+            }
+
+            const auto name = entry.path().filename().string();
+            const auto instance = Instance::Load(name);
+
+            if (instance != nullptr)
+            {
+                std::cout << "[Application::LoadInstances] Loaded instance: " << name << std::endl;
+                m_instances.push_back(instance);
+            }
+        }
+    }
+
+    void Application::PrepareUI()
+    {
+        m_main_window = new MainWindow(this);
+
+        int width, height;
+        GetInitialWindowSize(width, height);
+
+        m_main_window->resize(width, height);
+    }
+
+    void Application::CreatePaths()
+    {
+        const auto appdata_path = GetAppDataPath();
+
+        std::filesystem::create_directories(appdata_path);
+        std::filesystem::create_directories(appdata_path / "instances");
     }
 
     void Application::GetInitialWindowSize(int& out_width, int& out_height)
