@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
 #include <utility>
 
 namespace Actinium
@@ -47,7 +48,7 @@ namespace Actinium
 
         if (!std::filesystem::exists(instance_file))
         {
-            std::cout << "[Instance::Load] Instance file does not exist" << std::endl;
+            SPDLOG_ERROR("instance.json does not exist at: {}", location.string());
             return nullptr;
         }
 
@@ -57,7 +58,7 @@ namespace Actinium
 
         if (!name.has_value() || !game_id.has_value())
         {
-            std::cout << "[Instance::Load] Invalid instance file" << std::endl;
+            SPDLOG_ERROR("Invalid structured json inside instance.json at: {}", location.string());
             return nullptr;
         }
 
@@ -65,7 +66,7 @@ namespace Actinium
 
         if (game == GAMES.end())
         {
-            std::cout << "[Instance::Load] Invalid game id" << std::endl;
+            SPDLOG_ERROR("Game with id '{}' does not exist", game_id.value());
             return nullptr;
         }
 

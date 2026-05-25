@@ -4,6 +4,7 @@
 #include <QScreen>
 #include <QStandardPaths>
 #include <filesystem>
+#include <spdlog/spdlog.h>
 
 namespace Actinium
 {
@@ -16,6 +17,9 @@ namespace Actinium
         setApplicationName("actinium");
         setApplicationDisplayName("Actinium");
         setApplicationVersion("0.0.1");
+
+        spdlog::set_pattern("[%d/%m/%Y %T] [%^%l%$] [%s:%# %!()] %v");
+        SPDLOG_INFO("Running {} on v{}", applicationDisplayName().toStdString(), applicationVersion().toStdString());
 
         CreatePaths();
         LoadInstances();
@@ -55,7 +59,7 @@ namespace Actinium
 
         m_instances.push_back(instance);
 
-        std::cout << "[Application::CreateInstance] Instance created" << std::endl;
+        SPDLOG_INFO("Created instance: {}", name);
     }
 
     std::filesystem::path Application::GetAppDataPath()
@@ -89,7 +93,7 @@ namespace Actinium
 
             if (instance != nullptr)
             {
-                std::cout << "[Application::LoadInstances] Loaded instance: " << name << std::endl;
+                SPDLOG_INFO("Loaded instance: {}", name);
                 m_instances.push_back(instance);
             }
         }

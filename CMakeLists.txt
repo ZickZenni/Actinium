@@ -14,6 +14,7 @@ find_package(Qt6 COMPONENTS
 
 add_subdirectory(thirdparty/uuid)
 add_subdirectory(thirdparty/json)
+add_subdirectory(thirdparty/spdlog)
 
 add_executable(Actinium src/main.cpp
         src/core/application.cpp
@@ -33,6 +34,7 @@ target_link_libraries(Actinium
         Qt::Widgets
         uuid_v4::uuid_v4
         nlohmann_json
+        spdlog::spdlog
 )
 
 target_include_directories(Actinium PRIVATE src/)

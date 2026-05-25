@@ -5,7 +5,7 @@
 #include "ui/dialog/create_instance_dialog.h"
 
 #include <QToolBar>
-#include <iostream>
+#include <spdlog/spdlog.h>
 
 namespace Actinium
 {
@@ -45,15 +45,9 @@ namespace Actinium
         const auto name_value = dialog.GetNameValue().toStdString();
         const auto game_value = dialog.GetGameValue().toStdString();
 
-        if (name_value.empty())
+        if (name_value.empty() || game_value.empty())
         {
-            std::cout << "[MainWindow::CreateInstance] User did not input a name" << std::endl;
-            return;
-        }
-
-        if (game_value.empty())
-        {
-            std::cout << "[MainWindow::CreateInstance] User did not input a game" << std::endl;
+            SPDLOG_ERROR("Some of the inputs are empty, this should not be possible");
             return;
         }
 
