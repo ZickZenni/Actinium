@@ -2,6 +2,7 @@
 #include "main_window.h"
 
 #include "core/application.h"
+#include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
 
 #include <QToolBar>
@@ -18,6 +19,20 @@ namespace Actinium
         m_central_widget = new QWidget(this);
         m_central_widget->setObjectName("CentralWidget");
         setCentralWidget(m_central_widget);
+
+        m_instance_view = new InstanceView();
+        m_instance_view->setSelectionMode(QAbstractItemView::SingleSelection);
+
+        m_instance_list_model = new InstanceListModel(&m_app->m_instances, this);
+        m_instance_view->setModel(m_instance_list_model);
+
+        const auto delegate = new InstanceDelegate(this);
+        m_instance_view->setItemDelegate(delegate);
+        m_instance_view->setFrameShape(QFrame::NoFrame);
+        m_instance_view->setAttribute(Qt::WA_MacShowFocusRect, false);
+
+        const auto layout = new QVBoxLayout(m_central_widget);
+        layout->addWidget(m_instance_view);
 
         PrepareToolBar();
 

@@ -27,7 +27,20 @@ add_executable(Actinium src/main.cpp
         src/ui/dialog/create_instance_dialog.h
         src/util/json.h
         src/util/path.h
-        src/util/path.cpp)
+        src/util/path.cpp
+        src/ui/model/instance_model.cpp
+        src/ui/model/instance_model.h
+        src/ui/view/instance_view.cpp
+        src/ui/view/instance_view.h
+        src/ui/delegate/instance_delegate.cpp
+        src/ui/delegate/instance_delegate.h
+        src/util/qt.h
+        src/util/qt.cpp)
+
+add_custom_target(copy_resources
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources
+)
+add_dependencies(Actinium copy_resources)
 
 target_link_libraries(Actinium
         Qt::Core

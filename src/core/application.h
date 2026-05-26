@@ -70,6 +70,8 @@ namespace Actinium
          * Calculates the initial window size for the main window.
          */
         static void GetInitialWindowSize(int &out_width, int &out_height);
+
+        friend class MainWindow;
     };
 
     inline Application *GApp = nullptr;
