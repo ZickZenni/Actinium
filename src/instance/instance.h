@@ -2,8 +2,6 @@
 
 #include "game/game.h"
 
-#include <uuid_v4.h>
-
 namespace Actinium
 {
     class Instance
@@ -12,9 +10,20 @@ namespace Actinium
         std::string name;
 
         explicit Instance(const Game *game, std::string name);
-        explicit Instance(const Game *game, std::string name, const UUIDv4::UUID &uuid);
+        explicit Instance(const Game *game, std::string name, const std::string &directory_name);
 
+        /**
+         * Saves all instances data to the disk.
+         */
         void Save() const;
+
+        /**
+         * Retrieves the directory name where all data is stored in.
+         */
+        [[nodiscard]] const std::string &GetDirectoryName() const
+        {
+            return m_directory_name;
+        }
 
         /**
          * Retrieves the game that the instance is for.
@@ -25,19 +34,12 @@ namespace Actinium
         }
 
         /**
-         * Retrieves the UUID of the instance.
+         * Loads an instance into memory by reading the data saved on the disk.
          */
-        [[nodiscard]] const UUIDv4::UUID &GetUUID() const
-        {
-            return m_uuid;
-        }
-
-        static UUIDv4::UUID GenerateUUID();
-
-        static Instance* Load(const std::string& directory_name);
+        static Instance *Load(const std::string &directory_name);
 
     private:
+        std::string m_directory_name;
         const Game *m_game;
-        UUIDv4::UUID m_uuid;
     };
 }

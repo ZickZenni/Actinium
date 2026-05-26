@@ -12,7 +12,6 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-add_subdirectory(thirdparty/uuid)
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
 
@@ -26,13 +25,14 @@ add_executable(Actinium src/main.cpp
         src/game/game.h
         src/ui/dialog/create_instance_dialog.cpp
         src/ui/dialog/create_instance_dialog.h
-        src/util/json.h)
+        src/util/json.h
+        src/util/path.h
+        src/util/path.cpp)
 
 target_link_libraries(Actinium
         Qt::Core
         Qt::Gui
         Qt::Widgets
-        uuid_v4::uuid_v4
         nlohmann_json
         spdlog::spdlog
 )

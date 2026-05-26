@@ -2,6 +2,7 @@
 
 #include "core/application.h"
 #include "util/json.h"
+#include "util/path.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -11,20 +12,20 @@
 namespace Actinium
 {
     Instance::Instance(const Game* game, std::string name)
-        : Instance(game, std::move(name), GenerateUUID())
+        : Instance(game, std::move(name), PathUtils::SanitizeName(name))
     {
     }
 
-    Instance::Instance(const Game* game, std::string name, const UUIDv4::UUID& uuid)
+    Instance::Instance(const Game* game, std::string name, const std::string& directory_name)
         : name(std::move(name))
+        , m_directory_name(directory_name)
         , m_game(game)
-        , m_uuid(uuid)
     {
     }
 
     void Instance::Save() const
     {
-        const auto location = Application::GetAppDataPath() / "instances" / m_uuid.str();
+        const auto location = Application::GetAppDataPath() / "instances" / m_directory_name;
         const auto instance_file = location / "instance.json";
 
         std::filesystem::create_directories(location / "mods");
@@ -32,13 +33,6 @@ namespace Actinium
         const nlohmann::json json { { "name", name }, { "game", m_game->GetId() } };
 
         std::ofstream(instance_file) << json.dump(4);
-    }
-
-    UUIDv4::UUID Instance::GenerateUUID()
-    {
-        static UUIDv4::UUIDGenerator<std::mt19937_64> generator;
-
-        return generator.getUUID();
     }
 
     Instance* Instance::Load(const std::string& directory_name)
@@ -70,6 +64,6 @@ namespace Actinium
             return nullptr;
         }
 
-        return new Instance(game, name.value());
+        return new Instance(game, name.value(), directory_name);
     }
 }
