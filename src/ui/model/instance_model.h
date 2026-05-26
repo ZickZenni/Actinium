@@ -17,6 +17,8 @@ namespace Actinium
 
         QModelIndex index(int row, int column = 0, const QModelIndex &parent = QModelIndex()) const override;
 
+        Instance* at(int index) const;
+
     private:
         std::vector<Instance *> *m_instance_list;
     };

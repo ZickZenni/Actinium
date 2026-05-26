@@ -35,12 +35,16 @@ add_executable(Actinium src/main.cpp
         src/ui/delegate/instance_delegate.cpp
         src/ui/delegate/instance_delegate.h
         src/util/qt.h
-        src/util/qt.cpp)
+        src/util/qt.cpp
+        src/ui/widget/sidebar.cpp
+        src/ui/widget/sidebar.h)
 
 add_custom_target(copy_resources
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources
 )
 add_dependencies(Actinium copy_resources)
+
+target_compile_definitions(Actinium PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 
 target_link_libraries(Actinium
         Qt::Core

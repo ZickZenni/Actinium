@@ -185,10 +185,23 @@ namespace Actinium
 
             if (item_rect.intersects(rect))
             {
+                /**
+                 * Prevent selecting the same item and causing spamming to slots.
+                 */
+                if (selectionModel()->hasSelection() && selectionModel()->selectedIndexes().contains(index))
+                {
+                    return;
+                }
+
                 selectionModel()->select(index, command);
                 update(item_rect.translated(-QPoint(horizontalOffset(), verticalOffset())));
+
+                emit selectionChanged(index);
+                return;
             }
         }
+
+        emit selectionChanged({});
     }
 
     QRegion InstanceView::visualRegionForSelection(const QItemSelection& selection) const

@@ -6,6 +6,8 @@ namespace Actinium
 {
     class InstanceView : public QAbstractItemView
     {
+        Q_OBJECT
+
     public:
         explicit InstanceView(QWidget *parent = nullptr);
 
@@ -15,14 +17,17 @@ namespace Actinium
 
         QRect visualRect(const QModelIndex &index) const override;
 
+    signals:
+        void selectionChanged(const QModelIndex &index);
+
     protected:
         void updateGeometries() override;
 
-        void paintEvent(QPaintEvent* event) override;
+        void paintEvent(QPaintEvent *event) override;
 
-        void resizeEvent(QResizeEvent* event) override;
+        void resizeEvent(QResizeEvent *event) override;
 
-        void mouseMoveEvent(QMouseEvent* event) override;
+        void mouseMoveEvent(QMouseEvent *event) override;
 
         int verticalOffset() const override;
 

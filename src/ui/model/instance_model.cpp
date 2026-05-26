@@ -49,4 +49,14 @@ namespace Actinium
 
         return createIndex(row, column, m_instance_list->at(row));
     }
+
+    Instance* InstanceListModel::at(const int index) const
+    {
+        if (index < 0 || index >= m_instance_list->size())
+        {
+            return nullptr;
+        }
+
+        return m_instance_list->at(index);
+    }
 }

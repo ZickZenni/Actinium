@@ -18,6 +18,7 @@ namespace Actinium
         setApplicationDisplayName("Actinium");
         setApplicationVersion("0.0.1");
 
+        spdlog::set_level(spdlog::level::trace);
         spdlog::set_pattern("[%d/%m/%Y %T] [%^%l%$] [%s:%# %!()] %v");
         SPDLOG_INFO("Running {} on v{}", applicationDisplayName().toStdString(), applicationVersion().toStdString());
 

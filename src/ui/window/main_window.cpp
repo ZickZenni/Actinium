@@ -5,6 +5,7 @@
 #include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
 
+#include <QPushButton>
 #include <QToolBar>
 #include <spdlog/spdlog.h>
 
@@ -20,8 +21,23 @@ namespace Actinium
         m_central_widget->setObjectName("CentralWidget");
         setCentralWidget(m_central_widget);
 
-        m_instance_view = new InstanceView();
+        PrepareInstanceView();
+        PrepareSideBar();
+        PrepareToolBar();
+
+        const auto layout = new QHBoxLayout(m_central_widget);
+        layout->addWidget(m_instance_view);
+
+        SetSideBarState(false);
+        QMetaObject::connectSlotsByName(this);
+    }
+
+    void MainWindow::PrepareInstanceView()
+    {
+        m_instance_view = new InstanceView(this);
         m_instance_view->setSelectionMode(QAbstractItemView::SingleSelection);
+
+        connect(m_instance_view, &InstanceView::selectionChanged, this, &MainWindow::OnInstanceSelected);
 
         m_instance_list_model = new InstanceListModel(&m_app->m_instances, this);
         m_instance_view->setModel(m_instance_list_model);
@@ -30,22 +46,61 @@ namespace Actinium
         m_instance_view->setItemDelegate(delegate);
         m_instance_view->setFrameShape(QFrame::NoFrame);
         m_instance_view->setAttribute(Qt::WA_MacShowFocusRect, false);
+    }
 
-        const auto layout = new QVBoxLayout(m_central_widget);
-        layout->addWidget(m_instance_view);
+    void MainWindow::PrepareSideBar()
+    {
+        m_instance_sidebar = new SideBar(this);
+        m_instance_sidebar->setObjectName("InstanceSidebar");
+        m_instance_sidebar->setFloatable(false);
+        m_instance_sidebar->setAllowedAreas(Qt::LeftToolBarArea | Qt::RightToolBarArea);
+        m_instance_sidebar->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+        m_instance_sidebar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        m_instance_sidebar->setMinimumWidth(150);
+        m_instance_sidebar->setOrientation(Qt::Vertical);
 
-        PrepareToolBar();
+        connect(m_instance_sidebar, &QToolBar::orientationChanged,
+            [this](Qt::Orientation)
+            {
+                m_instance_sidebar->setOrientation(Qt::Vertical);
+            });
 
-        QMetaObject::connectSlotsByName(this);
+        m_sidebar_rename_button = new QPushButton(this);
+        m_sidebar_rename_button->setObjectName("RenameInstanceButton");
+        m_sidebar_rename_button->setText("");
+        m_sidebar_rename_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        m_sidebar_edit_button = new QPushButton(this);
+        m_sidebar_edit_button->setObjectName("EditInstanceButton");
+        m_sidebar_edit_button->setText("Edit Instance");
+        m_sidebar_edit_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        m_sidebar_delete_button = new QPushButton(this);
+        m_sidebar_delete_button->setObjectName("DeleteInstanceButton");
+        m_sidebar_delete_button->setText("Delete Instance");
+        m_sidebar_delete_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        m_instance_sidebar->addWidget(m_sidebar_rename_button);
+        m_instance_sidebar->addSeparator();
+        m_instance_sidebar->addWidget(m_sidebar_edit_button);
+        m_instance_sidebar->addWidget(m_sidebar_delete_button);
+
+        addToolBar(Qt::RightToolBarArea, m_instance_sidebar);
     }
 
     void MainWindow::PrepareToolBar()
     {
+        const auto toolbar = new QToolBar(this);
+        toolbar->setObjectName("MainToolbar");
+        toolbar->setFloatable(false);
+        toolbar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+
         const auto action_create_instance = new QAction(tr("&Create instance"), this);
         connect(action_create_instance, &QAction::triggered, this, &MainWindow::CreateInstance);
 
-        const auto toolbar = addToolBar("MainToolbar");
         toolbar->addAction(action_create_instance);
+
+        addToolBar(Qt::TopToolBarArea, toolbar);
     }
 
     void MainWindow::CreateInstance() const
@@ -67,6 +122,37 @@ namespace Actinium
         }
 
         m_app->CreateInstance(name_value, game_value);
+    }
+
+    void MainWindow::OnInstanceSelected(const QModelIndex& index) const
+    {
+        if (!index.isValid())
+        {
+            m_sidebar_rename_button->setText("");
+            SetSideBarState(false);
+            return;
+        }
+
+        const auto instance = m_instance_list_model->at(index.row());
+
+        if (instance == nullptr)
+        {
+            m_sidebar_rename_button->setText("");
+            SetSideBarState(false);
+            return;
+        }
+
+        SPDLOG_DEBUG("Selected instance: {}", instance->name);
+        m_sidebar_rename_button->setText(QString::fromStdString(instance->name));
+
+        SetSideBarState(true);
+    }
+
+    void MainWindow::SetSideBarState(const bool instance_selected) const
+    {
+        m_sidebar_rename_button->setEnabled(instance_selected);
+        m_sidebar_edit_button->setEnabled(instance_selected);
+        m_sidebar_delete_button->setEnabled(instance_selected);
     }
 }
 // ReSharper restore CppDFAMemoryLeak
