@@ -47,7 +47,7 @@ namespace Actinium
     {
         const auto game = GetGameById(game_id);
 
-        if (game == GAMES.end())
+        if (game == nullptr)
         {
             QMessageBox::critical(
                 m_main_window, "Internal Error", "The selected game was not found internally.", QMessageBox::Close);
