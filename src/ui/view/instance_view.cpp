@@ -218,7 +218,7 @@ namespace Actinium
 
     int InstanceView::CalculateItemsPerRow() const
     {
-        const auto content_width = width() - ITEM_MARGIN * 2;
+        const auto content_width = width() - ITEM_MARGIN;
         const auto items_per_row
             = static_cast<int>(qFloor(content_width) / static_cast<qreal>(InstanceDelegate::ITEM_SIZE + ITEM_MARGIN));
 
