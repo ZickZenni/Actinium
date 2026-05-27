@@ -152,12 +152,12 @@ namespace Actinium
                 selectionModel()->select(index, command);
                 update(item_rect.translated(-QPoint(horizontalOffset(), verticalOffset())));
 
-                emit selectionChanged(index);
+                emit SelectionChanged(index);
                 return;
             }
         }
 
-        emit selectionChanged({});
+        emit SelectionChanged({});
     }
 
     QRegion InstanceView::visualRegionForSelection(const QItemSelection& selection) const

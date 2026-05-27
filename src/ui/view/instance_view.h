@@ -18,7 +18,7 @@ namespace Actinium
         QRect visualRect(const QModelIndex &index) const override;
 
     signals:
-        void selectionChanged(const QModelIndex &index);
+        void SelectionChanged(const QModelIndex &index);
 
     protected:
         void updateGeometries() override;

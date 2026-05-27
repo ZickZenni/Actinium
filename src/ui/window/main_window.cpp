@@ -42,7 +42,7 @@ namespace Actinium
         m_instance_view->setAttribute(Qt::WA_MacShowFocusRect, false);
         m_instance_view->setContentsMargins(0, 0, 0, 0);
 
-        connect(m_instance_view, &InstanceView::selectionChanged, this, &MainWindow::OnInstanceSelected);
+        connect(m_instance_view, &InstanceView::SelectionChanged, this, &MainWindow::OnInstanceSelected);
 
         m_instance_list_model = new InstanceListModel(&m_app->m_instances, this);
         m_instance_view->setModel(m_instance_list_model);
