@@ -220,7 +220,7 @@ namespace Actinium
             /**
              * Hover state.
              */
-            if (is_selectable && option.rect.contains(m_mouse_position, true))
+            if (is_selectable && option.rect.contains(m_mouse_position))
             {
                 option.state |= QStyle::State_MouseOver;
             }
