@@ -2,6 +2,8 @@
 
 #include "game/game.h"
 
+#include <filesystem>
+
 namespace Actinium
 {
     class Instance
@@ -16,6 +18,11 @@ namespace Actinium
          * Saves all instances data to the disk.
          */
         void Save() const;
+
+        /**
+         * Retrieves the absolute path of the folder, where all data is stored in.
+         */
+        std::filesystem::path GetAbsolutePath() const;
 
         /**
          * Retrieves the directory name where all data is stored in.
@@ -37,6 +44,11 @@ namespace Actinium
          * Loads an instance into memory by reading the data saved on the disk.
          */
         static Instance *Load(const std::string &directory_name);
+
+        /**
+         * Constructs the absolute path of an instance folder.
+         */
+        static std::filesystem::path GetAbsolutePath(const std::string &directory_name);
 
     private:
         std::string m_directory_name;

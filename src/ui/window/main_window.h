@@ -38,6 +38,8 @@ namespace Actinium
 
         void CreateInstance() const;
 
+        void DeleteInstance();
+
         void OnInstanceSelected(const QModelIndex &index) const;
 
         void SetSideBarState(bool instance_selected) const;

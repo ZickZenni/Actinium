@@ -5,6 +5,7 @@
 #include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
 
+#include <QMessageBox>
 #include <QPushButton>
 #include <QToolBar>
 #include <spdlog/spdlog.h>
@@ -80,6 +81,8 @@ namespace Actinium
         m_sidebar_delete_button->setText("Delete Instance");
         m_sidebar_delete_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
+        connect(m_sidebar_delete_button, &QPushButton::clicked, this, &MainWindow::DeleteInstance);
+
         m_instance_sidebar->addWidget(m_sidebar_rename_button);
         m_instance_sidebar->addSeparator();
         m_instance_sidebar->addWidget(m_sidebar_edit_button);
@@ -122,6 +125,61 @@ namespace Actinium
         }
 
         m_app->CreateInstance(name_value, game_value);
+    }
+
+    void MainWindow::DeleteInstance()
+    {
+        const auto index = m_instance_view->selectionModel()->currentIndex();
+
+        if (!index.isValid())
+        {
+            return;
+        }
+
+        const auto instance = m_instance_list_model->at(index.row());
+
+        if (instance == nullptr)
+        {
+            return;
+        }
+
+        const auto message
+            = std::format("You are about to delete \"{}\".\nThis may be permanent and will completely delete the "
+                          "instance.\n\nAre you sure?",
+                instance->name);
+        const auto result = QMessageBox::warning(
+            this, "Confirm Deletion", message.c_str(), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+
+        if (result == QMessageBox::No)
+        {
+            return;
+        }
+
+        std::erase_if(m_app->m_instances,
+            [&instance](const auto& inst)
+            {
+                return inst == instance;
+            });
+
+        const auto instance_path = instance->GetAbsolutePath();
+
+        if (!std::filesystem::exists(instance_path))
+        {
+            SPDLOG_ERROR("Instance path does not exist: {}", instance_path.string());
+            return;
+        }
+
+        std::error_code delete_code;
+        std::filesystem::remove_all(instance_path, delete_code);
+
+        if (delete_code)
+        {
+            SPDLOG_ERROR("Failed to delete instance on the disk: {}", delete_code.message());
+            return;
+        }
+
+        SPDLOG_INFO("Deleted instance: {}", instance->name);
+        delete instance;
     }
 
     void MainWindow::OnInstanceSelected(const QModelIndex& index) const

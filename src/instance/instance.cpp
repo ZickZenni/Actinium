@@ -25,7 +25,7 @@ namespace Actinium
 
     void Instance::Save() const
     {
-        const auto location = Application::GetAppDataPath() / "instances" / m_directory_name;
+        const auto location = GetAbsolutePath();
         const auto instance_file = location / "instance.json";
 
         std::filesystem::create_directories(location / "mods");
@@ -35,9 +35,14 @@ namespace Actinium
         std::ofstream(instance_file) << json.dump(4);
     }
 
+    std::filesystem::path Instance::GetAbsolutePath() const
+    {
+        return GetAbsolutePath(m_directory_name);
+    }
+
     Instance* Instance::Load(const std::string& directory_name)
     {
-        const auto location = Application::GetAppDataPath() / "instances" / directory_name;
+        const auto location = GetAbsolutePath(directory_name);
         const auto instance_file = location / "instance.json";
 
         if (!std::filesystem::exists(instance_file))
@@ -65,5 +70,10 @@ namespace Actinium
         }
 
         return new Instance(game, name.value(), directory_name);
+    }
+
+    std::filesystem::path Instance::GetAbsolutePath(const std::string& directory_name)
+    {
+        return Application::GetAppDataPath() / "instances" / directory_name;
     }
 }
