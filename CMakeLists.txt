@@ -37,7 +37,9 @@ add_executable(Actinium src/main.cpp
         src/util/qt.h
         src/util/qt.cpp
         src/ui/widget/sidebar.cpp
-        src/ui/widget/sidebar.h)
+        src/ui/widget/sidebar.h
+        src/ui/window/instance_window.cpp
+        src/ui/window/instance_window.h)
 
 add_custom_target(copy_resources
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources

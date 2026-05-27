@@ -78,6 +78,8 @@ namespace Actinium
         m_sidebar_edit_button->setText("Edit Instance");
         m_sidebar_edit_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
+        connect(m_sidebar_edit_button, &QPushButton::clicked, this, &MainWindow::EditInstance);
+
         m_sidebar_delete_button = new QPushButton(this);
         m_sidebar_delete_button->setObjectName("DeleteInstanceButton");
         m_sidebar_delete_button->setText("Delete Instance");
@@ -129,16 +131,28 @@ namespace Actinium
         m_app->CreateInstance(name_value, game_value);
     }
 
-    void MainWindow::DeleteInstance()
+    void MainWindow::EditInstance()
     {
-        const auto index = m_instance_view->selectionModel()->currentIndex();
+        const auto instance = GetSelectedInstance();
 
-        if (!index.isValid())
+        if (instance == nullptr)
         {
             return;
         }
 
-        const auto instance = m_instance_list_model->at(index.row());
+        SPDLOG_DEBUG("Opening window for instance: {}", instance->name);
+
+        const auto instance_window = new InstanceWindow(instance, this);
+        instance_window->show();
+
+        connect(instance_window, &InstanceWindow::IsClosing, this, &MainWindow::OnInstanceWindowClosed);
+
+        m_instance_windows.push_back(instance_window);
+    }
+
+    void MainWindow::DeleteInstance()
+    {
+        const auto instance = GetSelectedInstance();
 
         if (instance == nullptr)
         {
@@ -155,6 +169,14 @@ namespace Actinium
         if (result == QMessageBox::No)
         {
             return;
+        }
+
+        for (const auto & window : m_instance_windows)
+        {
+            if (window->GetInstance() == instance)
+            {
+                window->close();
+            }
         }
 
         std::erase_if(m_app->m_instances,
@@ -186,14 +208,7 @@ namespace Actinium
 
     void MainWindow::OnInstanceSelected(const QModelIndex& index) const
     {
-        if (!index.isValid())
-        {
-            m_sidebar_rename_button->setText("");
-            SetSideBarState(false);
-            return;
-        }
-
-        const auto instance = m_instance_list_model->at(index.row());
+        const auto instance = GetSelectedInstance();
 
         if (instance == nullptr)
         {
@@ -208,11 +223,42 @@ namespace Actinium
         SetSideBarState(true);
     }
 
+    void MainWindow::OnInstanceWindowClosed()
+    {
+        const auto instance_window = qobject_cast<InstanceWindow*>(sender());
+
+        if (instance_window == nullptr)
+        {
+            SPDLOG_ERROR("Received non instance window pointer as sender");
+            return;
+        }
+
+        SPDLOG_DEBUG("Closing window for instance: {}", instance_window->GetInstance()->name);
+
+        std::erase_if(m_instance_windows,
+            [instance_window](const auto& window)
+            {
+                return window == instance_window;
+            });
+    }
+
     void MainWindow::SetSideBarState(const bool instance_selected) const
     {
         m_sidebar_rename_button->setEnabled(instance_selected);
         m_sidebar_edit_button->setEnabled(instance_selected);
         m_sidebar_delete_button->setEnabled(instance_selected);
+    }
+
+    Instance* MainWindow::GetSelectedInstance() const
+    {
+        const auto index = m_instance_view->selectionModel()->currentIndex();
+
+        if (!index.isValid())
+        {
+            return nullptr;
+        }
+
+        return m_instance_list_model->at(index.row());
     }
 }
 // ReSharper restore CppDFAMemoryLeak
