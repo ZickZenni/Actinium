@@ -36,7 +36,7 @@ namespace Actinium
 
         void PrepareToolBar();
 
-        void CreateInstance() const;
+        void CreateInstance();
 
         void DeleteInstance();
 

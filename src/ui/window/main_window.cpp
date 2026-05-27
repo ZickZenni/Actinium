@@ -106,9 +106,9 @@ namespace Actinium
         addToolBar(Qt::TopToolBarArea, toolbar);
     }
 
-    void MainWindow::CreateInstance() const
+    void MainWindow::CreateInstance()
     {
-        CreateInstanceDialog dialog;
+        CreateInstanceDialog dialog(this);
 
         if (!dialog.exec())
         {

@@ -16,6 +16,9 @@ namespace Actinium
         , m_game_combo(nullptr)
     {
         setObjectName("CreateInstanceDialog");
+        setWindowTitle("Create Instance");
+        setMinimumWidth(350);
+        setMinimumHeight(120);
 
         m_central_layout = new QVBoxLayout(this);
         m_central_layout->setObjectName("CentralLayout");
