@@ -27,6 +27,7 @@ namespace Actinium
         PrepareToolBar();
 
         const auto layout = new QHBoxLayout(m_central_widget);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(m_instance_view);
 
         SetSideBarState(false);
@@ -37,6 +38,9 @@ namespace Actinium
     {
         m_instance_view = new InstanceView(this);
         m_instance_view->setSelectionMode(QAbstractItemView::SingleSelection);
+        m_instance_view->setFrameShape(QFrame::NoFrame);
+        m_instance_view->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_instance_view->setContentsMargins(0, 0, 0, 0);
 
         connect(m_instance_view, &InstanceView::selectionChanged, this, &MainWindow::OnInstanceSelected);
 
@@ -45,8 +49,6 @@ namespace Actinium
 
         const auto delegate = new InstanceDelegate(this);
         m_instance_view->setItemDelegate(delegate);
-        m_instance_view->setFrameShape(QFrame::NoFrame);
-        m_instance_view->setAttribute(Qt::WA_MacShowFocusRect, false);
     }
 
     void MainWindow::PrepareSideBar()
