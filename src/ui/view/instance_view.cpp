@@ -17,9 +17,8 @@ namespace Actinium
     {
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        setAutoFillBackground(false);
-        viewport()->setAutoFillBackground(false);
         viewport()->setMouseTracking(true);
+        viewport()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     }
 
     void InstanceView::scrollTo(const QModelIndex& index, ScrollHint hint)
@@ -73,56 +72,13 @@ namespace Actinium
     {
         QPainter painter(viewport());
 
-        QStyleOptionViewItem option;
-        initViewItemOption(&option);
-        option.widget = this;
-
-        for (auto i = 0; i < model()->rowCount(); ++i)
+        if (model()->rowCount() > 0)
         {
-            const auto index = model()->index(i, 0);
-            const auto flags = index.flags();
-            const auto is_selectable = flags & Qt::ItemIsSelectable;
-
-            if (isIndexHidden(index))
-            {
-                continue;
-            }
-
-            option.rect = visualRect(index);
-            option.features |= QStyleOptionViewItem::WrapText;
-
-            /**
-             * Selected state.
-             */
-            if (is_selectable && selectionModel()->isSelected(index))
-            {
-                option.state |= selectionModel()->isSelected(index) ? QStyle::State_Selected : QStyle::State_None;
-            }
-            else
-            {
-                option.state &= ~QStyle::State_Selected;
-            }
-
-            /**
-             * Hover state.
-             */
-            if (is_selectable && option.rect.contains(m_mouse_position, true))
-            {
-                option.state |= QStyle::State_MouseOver;
-            }
-            else
-            {
-                option.state &= ~QStyle::State_MouseOver;
-            }
-
-            option.state |= index == currentIndex() ? QStyle::State_HasFocus : QStyle::State_None;
-
-            if (!(flags & Qt::ItemIsEnabled))
-            {
-                option.state &= ~QStyle::State_Enabled;
-            }
-
-            itemDelegate()->paint(&painter, option, index);
+            PaintInstances(painter);
+        }
+        else
+        {
+            PaintWelcomeMessage(painter);
         }
     }
 
@@ -229,9 +185,91 @@ namespace Actinium
         return region;
     }
 
+    void InstanceView::PaintInstances(QPainter& painter) const
+    {
+        QStyleOptionViewItem option;
+        initViewItemOption(&option);
+        option.widget = this;
+
+        for (auto i = 0; i < model()->rowCount(); ++i)
+        {
+            const auto index = model()->index(i, 0);
+            const auto flags = index.flags();
+            const auto is_selectable = flags & Qt::ItemIsSelectable;
+
+            if (isIndexHidden(index))
+            {
+                continue;
+            }
+
+            option.rect = visualRect(index);
+            option.features |= QStyleOptionViewItem::WrapText;
+
+            /**
+             * Selected state.
+             */
+            if (is_selectable && selectionModel()->isSelected(index))
+            {
+                option.state |= selectionModel()->isSelected(index) ? QStyle::State_Selected : QStyle::State_None;
+            }
+            else
+            {
+                option.state &= ~QStyle::State_Selected;
+            }
+
+            /**
+             * Hover state.
+             */
+            if (is_selectable && option.rect.contains(m_mouse_position, true))
+            {
+                option.state |= QStyle::State_MouseOver;
+            }
+            else
+            {
+                option.state &= ~QStyle::State_MouseOver;
+            }
+
+            option.state |= index == currentIndex() ? QStyle::State_HasFocus : QStyle::State_None;
+
+            if (!(flags & Qt::ItemIsEnabled))
+            {
+                option.state &= ~QStyle::State_Enabled;
+            }
+
+            itemDelegate()->paint(&painter, option, index);
+        }
+    }
+
+    void InstanceView::PaintWelcomeMessage(QPainter& painter) const
+    {
+        constexpr int FONT_SIZE = 20;
+        constexpr int TEXT_MARGIN = 20;
+        constexpr int FLAGS = Qt::AlignCenter | Qt::TextWordWrap;
+
+        painter.save();
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        const auto font = QFont("sans", FONT_SIZE);
+        const auto text = std::string("Welcome!\nClick \"Create Instance\" to get started.");
+
+        painter.setFont(font);
+
+        const auto bounds = viewport()->geometry().adjusted(TEXT_MARGIN, TEXT_MARGIN, -TEXT_MARGIN, -TEXT_MARGIN);
+        const auto font_metrics = painter.fontMetrics();
+        const auto text_rect = font_metrics.boundingRect(bounds, FLAGS, text.c_str());
+
+        painter.drawText(text_rect, FLAGS, text.c_str());
+        painter.restore();
+    }
+
+    int InstanceView::GetContentWidth() const
+    {
+        return width() - ITEM_MARGIN;
+    }
+
     int InstanceView::CalculateItemsPerRow() const
     {
-        const auto content_width = width() - ITEM_MARGIN;
+        const auto content_width = GetContentWidth();
         const auto items_per_row
             = static_cast<int>(qFloor(content_width) / static_cast<qreal>(InstanceDelegate::ITEM_SIZE + ITEM_MARGIN));
 

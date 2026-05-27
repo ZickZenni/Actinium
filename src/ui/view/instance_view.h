@@ -45,6 +45,12 @@ namespace Actinium
         int m_items_per_row;
         QPoint m_mouse_position;
 
+        void PaintInstances(QPainter& painter) const;
+
+        void PaintWelcomeMessage(QPainter& painter) const;
+
+        int GetContentWidth() const;
+
         int CalculateItemsPerRow() const;
     };
 }
