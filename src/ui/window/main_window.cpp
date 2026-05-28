@@ -19,6 +19,15 @@ namespace Actinium
     MainWindow::MainWindow(Application* app, QWidget* widget)
         : QMainWindow(widget)
         , m_app(app)
+        , m_central_widget(nullptr)
+        , m_instance_list_model(nullptr)
+        , m_instance_view(nullptr)
+        , m_instance_sidebar(nullptr)
+        , m_sidebar_rename_button(nullptr)
+        , m_sidebar_launch_button(nullptr)
+        , m_sidebar_edit_button(nullptr)
+        , m_sidebar_delete_button(nullptr)
+        , m_sidebar_folder_button(nullptr)
     {
         setObjectName("MainWindow");
 
