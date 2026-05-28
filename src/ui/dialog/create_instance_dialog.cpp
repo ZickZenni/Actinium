@@ -31,7 +31,7 @@ namespace Actinium
             auto* name_label = new QLabel("Name:");
             name_label->setObjectName("NameLabel");
 
-            auto* name_layout = new QHBoxLayout(this);
+            auto* name_layout = new QHBoxLayout();
             name_layout->setObjectName("NameLayout");
             name_layout->addWidget(name_label);
             name_layout->addWidget(m_name_input);
@@ -57,7 +57,7 @@ namespace Actinium
             auto* game_label = new QLabel("Game:");
             game_label->setObjectName("GameLabel");
 
-            auto* game_layout = new QHBoxLayout(this);
+            auto* game_layout = new QHBoxLayout();
             game_layout->setObjectName("GameLayout");
             game_layout->addWidget(game_label);
             game_layout->addWidget(m_game_combo, 1);
@@ -76,7 +76,7 @@ namespace Actinium
             connect(m_button_box, &QDialogButtonBox::accepted, this, qOverload<>(&QDialog::accept));
             connect(m_button_box, &QDialogButtonBox::rejected, this, qOverload<>(&QDialog::reject));
 
-            auto* button_box_layout = new QVBoxLayout(this);
+            auto* button_box_layout = new QVBoxLayout();
             button_box_layout->setObjectName("ButtonBoxLayout");
             button_box_layout->addStretch();
             button_box_layout->addWidget(m_button_box, 0, Qt::AlignmentFlag::AlignRight);
