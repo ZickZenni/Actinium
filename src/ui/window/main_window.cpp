@@ -6,6 +6,7 @@
 #include "ui/dialog/create_instance_dialog.h"
 
 #include <QCloseEvent>
+#include <QDesktopServices>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QToolBar>
@@ -101,10 +102,18 @@ namespace Actinium
 
         connect(m_sidebar_delete_button, &QPushButton::clicked, this, &MainWindow::DeleteInstance);
 
+        m_sidebar_folder_button = new QPushButton(this);
+        m_sidebar_folder_button->setObjectName("OpenInstanceFolderButton");
+        m_sidebar_folder_button->setText("Open Folder");
+        m_sidebar_folder_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        connect(m_sidebar_folder_button, &QPushButton::clicked, this, &MainWindow::OpenInstanceFolder);
+
         m_instance_sidebar->addWidget(m_sidebar_rename_button);
         m_instance_sidebar->addSeparator();
         m_instance_sidebar->addWidget(m_sidebar_edit_button);
         m_instance_sidebar->addWidget(m_sidebar_delete_button);
+        m_instance_sidebar->addWidget(m_sidebar_folder_button);
 
         addToolBar(Qt::RightToolBarArea, m_instance_sidebar);
     }
@@ -220,6 +229,20 @@ namespace Actinium
         delete instance;
     }
 
+    void MainWindow::OpenInstanceFolder() const
+    {
+        const auto instance = GetSelectedInstance();
+
+        if (instance == nullptr)
+        {
+            return;
+        }
+
+        const auto url = "file:///" + instance->GetAbsolutePath().string();
+
+        QDesktopServices::openUrl(QUrl(QString::fromStdString(url), QUrl::TolerantMode));
+    }
+
     void MainWindow::OnInstanceSelected(const QModelIndex& index) const
     {
         const auto instance = GetSelectedInstance();
@@ -261,6 +284,7 @@ namespace Actinium
         m_sidebar_rename_button->setEnabled(instance_selected);
         m_sidebar_edit_button->setEnabled(instance_selected);
         m_sidebar_delete_button->setEnabled(instance_selected);
+        m_sidebar_folder_button->setEnabled(instance_selected);
     }
 
     Instance* MainWindow::GetSelectedInstance() const

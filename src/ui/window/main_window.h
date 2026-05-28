@@ -20,7 +20,7 @@ namespace Actinium
         explicit MainWindow(Application *app, QWidget *widget = nullptr);
 
     protected:
-        void closeEvent(QCloseEvent* event) override;
+        void closeEvent(QCloseEvent *event) override;
 
     private:
         Application *m_app;
@@ -34,6 +34,7 @@ namespace Actinium
         QPushButton *m_sidebar_rename_button;
         QPushButton *m_sidebar_edit_button;
         QPushButton *m_sidebar_delete_button;
+        QPushButton *m_sidebar_folder_button;
 
         void PrepareInstanceView();
 
@@ -47,12 +48,14 @@ namespace Actinium
 
         void DeleteInstance();
 
+        void OpenInstanceFolder() const;
+
         void OnInstanceSelected(const QModelIndex &index) const;
 
         void OnInstanceWindowClosed();
 
         void SetSideBarState(bool instance_selected) const;
 
-        Instance* GetSelectedInstance() const;
+        Instance *GetSelectedInstance() const;
     };
 }
