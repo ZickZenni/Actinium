@@ -3,8 +3,10 @@
 #include <QApplication>
 #include <QStyleOptionViewItem>
 #include <QTextLayout>
+#include <filesystem>
 
 #define qstr(x) x.toStdString()
+#define strq(x) QString::fromStdString(x)
 
 namespace Actinium
 {
@@ -18,5 +20,7 @@ namespace Actinium
         static void ViewItemTextLayout(QTextLayout &layout, int lineWidth, qreal &height, qreal &used_width);
 
         static QStyle *GetCorrectStyle(const QStyleOptionViewItem &option);
+
+        static QUrl CreateFileUrl(const std::filesystem::path &path);
     };
 }

@@ -4,6 +4,7 @@
 #include "core/application.h"
 #include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
+#include "util/qt.h"
 
 #include <QCloseEvent>
 #include <QDesktopServices>
@@ -238,9 +239,10 @@ namespace Actinium
             return;
         }
 
-        const auto url = "file:///" + instance->GetAbsolutePath().string();
+        const auto url = QTUtils::CreateFileUrl(instance->GetAbsolutePath());
+        SPDLOG_DEBUG("Opening url: {}", url.toEncoded().toStdString());
 
-        QDesktopServices::openUrl(QUrl(QString::fromStdString(url), QUrl::TolerantMode));
+        QDesktopServices::openUrl(url);
     }
 
     void MainWindow::OnInstanceSelected(const QModelIndex& index) const

@@ -58,4 +58,9 @@ namespace Actinium
     {
         return option.widget ? option.widget->style() : QApplication::style();
     }
+
+    QUrl QTUtils::CreateFileUrl(const std::filesystem::path& path)
+    {
+        return QUrl::fromLocalFile(strq(path.string()));
+    }
 }
