@@ -152,8 +152,8 @@ namespace Actinium
             return;
         }
 
-        const auto name_value = dialog.GetNameValue().toStdString();
-        const auto game_value = dialog.GetGameValue().toStdString();
+        const auto name_value = dialog.GetInstanceName().toStdString();
+        const auto game_value = dialog.GetGameId().toStdString();
 
         if (name_value.empty() || game_value.empty())
         {

@@ -5,12 +5,12 @@
 
 #include <QLabel>
 #include <QPushButton>
+#include <QVBoxLayout>
 
 namespace Actinium
 {
     CreateInstanceDialog::CreateInstanceDialog(QWidget* parent)
         : QDialog(parent)
-        , m_central_layout(nullptr)
         , m_button_box(nullptr)
         , m_name_input(nullptr)
         , m_game_combo(nullptr)
@@ -20,8 +20,8 @@ namespace Actinium
         setMinimumWidth(350);
         setMinimumHeight(120);
 
-        m_central_layout = new QVBoxLayout(this);
-        m_central_layout->setObjectName("CentralLayout");
+        const auto central_layout = new QVBoxLayout(this);
+        central_layout->setObjectName("CentralLayout");
 
         {
             m_name_input = new QLineEdit();
@@ -31,14 +31,14 @@ namespace Actinium
             auto* name_label = new QLabel("Name:");
             name_label->setObjectName("NameLabel");
 
-            auto* name_layout = new QHBoxLayout();
+            auto* name_layout = new QHBoxLayout(this);
             name_layout->setObjectName("NameLayout");
             name_layout->addWidget(name_label);
             name_layout->addWidget(m_name_input);
 
             connect(m_name_input, &QLineEdit::textChanged, this, &CreateInstanceDialog::ValidateInput);
 
-            m_central_layout->addLayout(name_layout);
+            central_layout->addLayout(name_layout);
         }
 
         {
@@ -57,14 +57,14 @@ namespace Actinium
             auto* game_label = new QLabel("Game:");
             game_label->setObjectName("GameLabel");
 
-            auto* game_layout = new QHBoxLayout();
+            auto* game_layout = new QHBoxLayout(this);
             game_layout->setObjectName("GameLayout");
             game_layout->addWidget(game_label);
             game_layout->addWidget(m_game_combo, 1);
 
             connect(m_game_combo, &QComboBox::currentIndexChanged, this, &CreateInstanceDialog::ValidateInput);
 
-            m_central_layout->addLayout(game_layout);
+            central_layout->addLayout(game_layout);
         }
 
         {
@@ -76,16 +76,15 @@ namespace Actinium
             connect(m_button_box, &QDialogButtonBox::accepted, this, qOverload<>(&QDialog::accept));
             connect(m_button_box, &QDialogButtonBox::rejected, this, qOverload<>(&QDialog::reject));
 
-            auto* button_box_layout = new QVBoxLayout();
+            auto* button_box_layout = new QVBoxLayout(this);
             button_box_layout->setObjectName("ButtonBoxLayout");
             button_box_layout->addStretch();
             button_box_layout->addWidget(m_button_box, 0, Qt::AlignmentFlag::AlignRight);
 
-            m_central_layout->addLayout(button_box_layout);
+            central_layout->addLayout(button_box_layout);
         }
 
         ValidateInput();
-        QMetaObject::connectSlotsByName(this);
     }
 
     void CreateInstanceDialog::ValidateInput() const
@@ -96,10 +95,10 @@ namespace Actinium
         }
 
         const auto button = m_button_box->button(QDialogButtonBox::StandardButton::Ok);
-        const auto name_input = m_name_input->text();
-        const auto game_input = m_game_combo->currentText();
+        const auto name_input = m_name_input->text().trimmed();
+        const auto game_input = m_game_combo->currentData().toString().trimmed();
 
-        button->setEnabled(!name_input.trimmed().isEmpty() && !game_input.trimmed().isEmpty());
+        button->setEnabled(!name_input.isEmpty() && !game_input.isEmpty());
     }
 }
 // ReSharper restore CppDFAMemoryLeak
