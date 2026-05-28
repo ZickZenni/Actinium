@@ -198,6 +198,14 @@ namespace Actinium
 
     void MainWindow::DeleteInstance()
     {
+        constexpr QMessageBox::StandardButtons BUTTONS = QMessageBox::Yes | QMessageBox::No;
+        constexpr QMessageBox::Button DEFAULT_BUTTON = QMessageBox::No;
+
+        static const auto TITLE = QStringLiteral("Confirm Deletion");
+        static const auto MESSAGE = QStringLiteral("You are about to delete \"%1\".\n"
+                                                   "This may be permanent and will completely delete the instance.\n\n"
+                                                   "Are you sure?");
+
         const auto instance = GetSelectedInstance();
 
         if (instance == nullptr)
@@ -205,12 +213,8 @@ namespace Actinium
             return;
         }
 
-        const auto message
-            = std::format("You are about to delete \"{}\".\nThis may be permanent and will completely delete the "
-                          "instance.\n\nAre you sure?",
-                instance->name);
-        const auto result = QMessageBox::warning(
-            this, "Confirm Deletion", message.c_str(), QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        const auto message = MESSAGE.arg(strq(instance->name));
+        const auto result = QMessageBox::warning(this, TITLE, message, BUTTONS, DEFAULT_BUTTON);
 
         if (result == QMessageBox::No)
         {
