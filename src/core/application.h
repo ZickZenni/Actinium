@@ -15,7 +15,7 @@ namespace Actinium
         Application(int argc, char *argv[]);
         ~Application() override;
 
-        int Run() const;
+        [[nodiscard]] int Run() const;
 
         /**
          * Creates a new instance for a game.
@@ -70,6 +70,8 @@ namespace Actinium
          * Calculates the initial window size for the main window.
          */
         static void GetInitialWindowSize(int &out_width, int &out_height);
+
+        static void LogEnvironmentInfo();
 
         friend class MainWindow;
     };

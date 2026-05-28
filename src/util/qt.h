@@ -4,6 +4,8 @@
 #include <QStyleOptionViewItem>
 #include <QTextLayout>
 
+#define qstr(x) x.toStdString()
+
 namespace Actinium
 {
     class QTUtils

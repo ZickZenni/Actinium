@@ -47,7 +47,7 @@ namespace Actinium
 
         if (!std::filesystem::exists(instance_file))
         {
-            SPDLOG_ERROR("instance.json does not exist at: {}", location.string());
+            SPDLOG_ERROR("instance.json does not exist inside \"{}\"", location.string());
             return nullptr;
         }
 
@@ -57,7 +57,7 @@ namespace Actinium
 
         if (!name.has_value() || !game_id.has_value())
         {
-            SPDLOG_ERROR("Invalid structured json inside instance.json at: {}", location.string());
+            SPDLOG_ERROR("Invalid structured json inside instance.json inside \"{}\"", location.string());
             return nullptr;
         }
 
@@ -65,7 +65,7 @@ namespace Actinium
 
         if (game == nullptr)
         {
-            SPDLOG_ERROR("Game with id '{}' does not exist", game_id.value());
+            SPDLOG_ERROR("Game with id \"{}\" does not exist", game_id.value());
             return nullptr;
         }
 

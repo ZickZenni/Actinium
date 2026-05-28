@@ -19,6 +19,9 @@ namespace Actinium
     public:
         explicit MainWindow(Application *app, QWidget *widget = nullptr);
 
+    protected:
+        void closeEvent(QCloseEvent* event) override;
+
     private:
         Application *m_app;
 

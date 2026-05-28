@@ -5,6 +5,7 @@
 #include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
 
+#include <QCloseEvent>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QToolBar>
@@ -32,6 +33,19 @@ namespace Actinium
 
         SetSideBarState(false);
         QMetaObject::connectSlotsByName(this);
+    }
+
+    void MainWindow::closeEvent(QCloseEvent* event)
+    {
+        SPDLOG_DEBUG("Closing main window");
+
+        for (const auto& window : m_instance_windows)
+        {
+            window->close();
+            delete window;
+        }
+
+        event->accept();
     }
 
     void MainWindow::PrepareInstanceView()
@@ -171,7 +185,7 @@ namespace Actinium
             return;
         }
 
-        for (const auto & window : m_instance_windows)
+        for (const auto& window : m_instance_windows)
         {
             if (window->GetInstance() == instance)
             {

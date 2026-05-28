@@ -1,21 +1,76 @@
-cmake_minimum_required(VERSION 4.2.2)
-project(Actinium)
+cmake_minimum_required(VERSION 3.24)
+project(Actinium LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 23)
+### CMake Options ###
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 COMPONENTS
+### Compiler Flags ###
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+### Version ###
+set(MAJOR_VERSION 0)
+set(MINOR_VERSION 0)
+set(PATCH_VERSION 1)
+
+### Git ###
+set(GIT_COMMIT_MESSAGE "unknown")
+set(GIT_COMMIT_HASH "unknown")
+set(GIT_BRANCH "unknown")
+
+### Build ###
+string(TIMESTAMP CURRENT_TIME "%d-%m-%Y %H:%M:%S")
+set(BUILD_TIMESTAMP "${CURRENT_TIME}")
+
+find_package(Git QUIET)
+
+if (Git_FOUND)
+    execute_process(
+            COMMAND "${GIT_EXECUTABLE}" log -1 --format=%B
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            OUTPUT_VARIABLE GIT_COMMIT_MESSAGE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+    )
+
+    execute_process(
+            COMMAND "${GIT_EXECUTABLE}" log -1 --format=%h
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            OUTPUT_VARIABLE GIT_COMMIT_HASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+    )
+
+    execute_process(
+            COMMAND "${GIT_EXECUTABLE}" branch --show-current
+            WORKING_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}"
+            OUTPUT_VARIABLE GIT_BRANCH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+    )
+
+    string(REPLACE "\\" "\\\\" GIT_COMMIT_MESSAGE "${GIT_COMMIT_MESSAGE}")
+    string(REPLACE "\"" "\\\"" GIT_COMMIT_MESSAGE "${GIT_COMMIT_MESSAGE}")
+    string(REPLACE "\n" " " GIT_COMMIT_MESSAGE "${GIT_COMMIT_MESSAGE}")
+endif ()
+
+find_package(Qt6 REQUIRED COMPONENTS
         Core
         Gui
         Widgets
-        REQUIRED)
+)
 
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
 
-add_executable(Actinium src/main.cpp
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
+
+add_executable(Actinium)
+
+target_sources(Actinium PRIVATE
+        src/main.cpp
         src/core/application.cpp
         src/core/application.h
         src/ui/window/main_window.cpp
@@ -39,21 +94,27 @@ add_executable(Actinium src/main.cpp
         src/ui/widget/sidebar.cpp
         src/ui/widget/sidebar.h
         src/ui/window/instance_window.cpp
-        src/ui/window/instance_window.h)
-
-add_custom_target(copy_resources
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources
+        src/ui/window/instance_window.h
+        ${CMAKE_CURRENT_BINARY_DIR}/build_config.h
 )
-add_dependencies(Actinium copy_resources)
 
-target_compile_definitions(Actinium PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+target_compile_definitions(Actinium PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 
 target_link_libraries(Actinium
-        Qt::Core
-        Qt::Gui
-        Qt::Widgets
+        Qt6::Core
+        Qt6::Gui
+        Qt6::Widgets
         nlohmann_json
         spdlog::spdlog
 )
 
-target_include_directories(Actinium PRIVATE src/)
+target_include_directories(Actinium PRIVATE
+        src/
+        "${CMAKE_CURRENT_BINARY_DIR}/build/"
+)
+
+add_custom_target(TARGET Actinium POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_directory
+        "${CMAKE_CURRENT_LIST_DIR}/resources"
+        "${CMAKE_CURRENT_BINARY_DIR}/resources"
+)

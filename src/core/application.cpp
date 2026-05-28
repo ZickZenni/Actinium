@@ -1,5 +1,8 @@
 #include "application.h"
 
+#include "build_config.h"
+#include "util/qt.h"
+
 #include <QMessageBox>
 #include <QScreen>
 #include <QStandardPaths>
@@ -16,12 +19,13 @@ namespace Actinium
         setOrganizationDomain("https://github.com/ZickZenni");
         setApplicationName("actinium");
         setApplicationDisplayName("Actinium");
-        setApplicationVersion("0.0.1");
+        setApplicationVersion(VERSION);
 
         spdlog::set_level(spdlog::level::trace);
-        spdlog::set_pattern("[%d/%m/%Y %T] [%^%l%$] [%s:%# %!()] %v");
+        spdlog::set_pattern("[%H:%M:%S.%e] [%^%-8l%$] [%s:%#] %v");
         SPDLOG_INFO("Running {} on v{}", applicationDisplayName().toStdString(), applicationVersion().toStdString());
 
+        LogEnvironmentInfo();
         CreatePaths();
         LoadInstances();
         PrepareUI();
@@ -29,12 +33,14 @@ namespace Actinium
 
     Application::~Application()
     {
+        m_main_window->close();
+
+        delete m_main_window;
+
         for (const auto& instance : m_instances)
         {
             delete instance;
         }
-
-        delete m_main_window;
     }
 
     int Application::Run() const
@@ -82,32 +88,45 @@ namespace Actinium
     void Application::LoadInstances()
     {
         const auto instances_path = GetAppDataPath() / "instances";
+        SPDLOG_INFO("Loading instances in \"{}\"", instances_path.string());
+
         const auto entries = std::filesystem::directory_iterator(instances_path);
 
         for (const auto& entry : entries)
         {
             if (!entry.is_directory())
             {
+                SPDLOG_WARN("Skipping non-directory entry \"{}\"", entry.path().string());
                 continue;
             }
 
             const auto name = entry.path().filename().string();
+            SPDLOG_INFO("Found instance directory \"{}\"", name);
+
             const auto instance = Instance::Load(name);
 
             if (instance != nullptr)
             {
-                SPDLOG_INFO("Loaded instance: {}", name);
+                SPDLOG_INFO("Loaded instance \"{}\" from \"{}\"", instance->name, entry.path().string());
                 m_instances.push_back(instance);
+            }
+            else
+            {
+                SPDLOG_ERROR("Failed to load instance \"{}\" from \"{}\"", name, entry.path().string());
             }
         }
     }
 
     void Application::PrepareUI()
     {
+        SPDLOG_DEBUG("Preparing UI for application");
+
         m_main_window = new MainWindow(this);
 
         int width, height;
         GetInitialWindowSize(width, height);
+
+        SPDLOG_DEBUG("Initial window size: {}x{}", width, height);
 
         m_main_window->resize(width, height);
     }
@@ -115,6 +134,7 @@ namespace Actinium
     void Application::CreatePaths()
     {
         const auto appdata_path = GetAppDataPath();
+        SPDLOG_INFO("Using data path \"{}\"", appdata_path.string());
 
         std::filesystem::create_directories(appdata_path);
         std::filesystem::create_directories(appdata_path / "instances");
@@ -127,5 +147,15 @@ namespace Actinium
 
         out_width = std::min(screen_size.width() - 20, 1280);
         out_height = std::min(screen_size.height() - 90, 720);
+    }
+
+    void Application::LogEnvironmentInfo()
+    {
+        SPDLOG_INFO("Architecture: {}", qstr(QSysInfo::buildCpuArchitecture()));
+        SPDLOG_INFO("Platform: {} ({})", qstr(QSysInfo::prettyProductName()), qstr(QSysInfo::productVersion()));
+        SPDLOG_INFO("Hostname: {}", qstr(QSysInfo::machineHostName()));
+        SPDLOG_INFO("Git Commit: {} - \"{}\"", GIT_COMMIT_HASH, GIT_COMMIT_MESSAGE);
+        SPDLOG_INFO("Git Branch: {}", GIT_BRANCH);
+        SPDLOG_INFO("Build Timestamp: {}", BUILD_TIMESTAMP);
     }
 }
