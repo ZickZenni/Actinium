@@ -89,6 +89,13 @@ namespace Actinium
         m_sidebar_rename_button->setText("");
         m_sidebar_rename_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
+        m_sidebar_launch_button = new QPushButton(this);
+        m_sidebar_launch_button->setObjectName("LaunchInstanceButton");
+        m_sidebar_launch_button->setText("Launch");
+        m_sidebar_launch_button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        connect(m_sidebar_launch_button, &QPushButton::clicked, this, &MainWindow::LaunchInstance);
+
         m_sidebar_edit_button = new QPushButton(this);
         m_sidebar_edit_button->setObjectName("EditInstanceButton");
         m_sidebar_edit_button->setText("Edit Instance");
@@ -111,6 +118,8 @@ namespace Actinium
         connect(m_sidebar_folder_button, &QPushButton::clicked, this, &MainWindow::OpenInstanceFolder);
 
         m_instance_sidebar->addWidget(m_sidebar_rename_button);
+        m_instance_sidebar->addSeparator();
+        m_instance_sidebar->addWidget(m_sidebar_launch_button);
         m_instance_sidebar->addSeparator();
         m_instance_sidebar->addWidget(m_sidebar_edit_button);
         m_instance_sidebar->addWidget(m_sidebar_delete_button);
@@ -153,6 +162,18 @@ namespace Actinium
         }
 
         m_app->CreateInstance(name_value, game_value);
+    }
+
+    void MainWindow::LaunchInstance() const
+    {
+        const auto instance = GetSelectedInstance();
+
+        if (instance == nullptr)
+        {
+            return;
+        }
+
+        SPDLOG_INFO("Launching instance \"{}\"", instance->name);
     }
 
     void MainWindow::EditInstance()
@@ -284,6 +305,7 @@ namespace Actinium
     void MainWindow::SetSideBarState(const bool instance_selected) const
     {
         m_sidebar_rename_button->setEnabled(instance_selected);
+        m_sidebar_launch_button->setEnabled(instance_selected);
         m_sidebar_edit_button->setEnabled(instance_selected);
         m_sidebar_delete_button->setEnabled(instance_selected);
         m_sidebar_folder_button->setEnabled(instance_selected);

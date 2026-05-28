@@ -32,6 +32,7 @@ namespace Actinium
         SideBar *m_instance_sidebar;
 
         QPushButton *m_sidebar_rename_button;
+        QPushButton *m_sidebar_launch_button;
         QPushButton *m_sidebar_edit_button;
         QPushButton *m_sidebar_delete_button;
         QPushButton *m_sidebar_folder_button;
@@ -43,6 +44,8 @@ namespace Actinium
         void PrepareToolBar();
 
         void CreateInstance();
+
+        void LaunchInstance() const;
 
         void EditInstance();
 
