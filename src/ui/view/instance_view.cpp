@@ -44,7 +44,7 @@ namespace Actinium
     {
         if (!index.isValid() || isIndexHidden(index) || index.column() > 0)
         {
-            return QRect();
+            return {};
         }
 
         QStyleOptionViewItem option;
@@ -127,8 +127,36 @@ namespace Actinium
         return false;
     }
 
-    QModelIndex InstanceView::moveCursor(CursorAction action, Qt::KeyboardModifiers modifiers)
+    QModelIndex InstanceView::moveCursor(const CursorAction action, Qt::KeyboardModifiers modifiers)
     {
+        if (model()->rowCount() == 0)
+        {
+            return {};
+        }
+
+        const auto current_index = selectionModel()->currentIndex();
+
+        if (!current_index.isValid())
+        {
+            return {};
+        }
+
+        const auto row = current_index.row();
+
+        switch (action)
+        {
+            case MoveUp:
+                return model()->index(row - m_items_per_row, 0);
+            case MoveDown:
+                return model()->index(row + m_items_per_row, 0);
+            case MoveLeft:
+                return model()->index(row - 1, 0);
+            case MoveRight:
+                return model()->index(row + 1, 0);
+            default:
+                break;
+        }
+
         return {};
     }
 
