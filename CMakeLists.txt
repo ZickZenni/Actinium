@@ -64,10 +64,19 @@ find_package(Qt6 REQUIRED COMPONENTS
 
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
+add_subdirectory(thirdparty/cpr)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
 
-add_executable(Actinium)
+add_executable(Actinium
+        src/ui/dialog/launch_instance_dialog.cpp
+        src/ui/dialog/launch_instance_dialog.h
+        src/worker/worker.h
+        src/util/github.cpp
+        src/util/github.h
+        src/worker/task.h
+        src/worker/tasks/download_loader_task.cpp
+        src/worker/tasks/download_loader_task.h)
 
 target_sources(Actinium PRIVATE
         src/main.cpp
@@ -106,6 +115,7 @@ target_link_libraries(Actinium
         Qt6::Widgets
         nlohmann_json
         spdlog::spdlog
+        cpr::cpr
 )
 
 target_include_directories(Actinium PRIVATE

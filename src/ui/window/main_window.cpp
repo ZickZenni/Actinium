@@ -183,7 +183,7 @@ namespace Actinium
             return;
         }
 
-        SPDLOG_INFO("Launching instance \"{}\"", instance->name);
+        GApp->LaunchInstance(instance);
     }
 
     void MainWindow::EditInstance()

@@ -1,6 +1,7 @@
 #include "application.h"
 
 #include "build_config.h"
+#include "ui/dialog/launch_instance_dialog.h"
 #include "util/qt.h"
 
 #include <QMessageBox>
@@ -67,6 +68,16 @@ namespace Actinium
         m_instances.push_back(instance);
 
         SPDLOG_INFO("Created instance: {}", name);
+    }
+
+    void Application::LaunchInstance(Instance* instance)
+    {
+        Q_CHECK_PTR(instance);
+
+        SPDLOG_INFO("Launching instance \"{}\"", instance->name);
+
+        LaunchInstanceDialog dialog(instance, m_main_window);
+        dialog.exec();
     }
 
     std::filesystem::path Application::GetAppDataPath()

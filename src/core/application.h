@@ -23,6 +23,11 @@ namespace Actinium
         void CreateInstance(const std::string &name, const std::string &game_id);
 
         /**
+         * Launches an instance.
+         */
+        void LaunchInstance(Instance* instance);
+
+        /**
          * Retrieves the appdata path for the application.
          */
         static std::filesystem::path GetAppDataPath();
