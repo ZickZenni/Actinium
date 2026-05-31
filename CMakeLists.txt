@@ -20,10 +20,6 @@ set(GIT_COMMIT_MESSAGE "unknown")
 set(GIT_COMMIT_HASH "unknown")
 set(GIT_BRANCH "unknown")
 
-### Build ###
-string(TIMESTAMP CURRENT_TIME "%d-%m-%Y %H:%M:%S")
-set(BUILD_TIMESTAMP "${CURRENT_TIME}")
-
 find_package(Git QUIET)
 
 if (Git_FOUND)
@@ -56,28 +52,27 @@ if (Git_FOUND)
     string(REPLACE "\n" " " GIT_COMMIT_MESSAGE "${GIT_COMMIT_MESSAGE}")
 endif ()
 
-find_package(Qt6 REQUIRED COMPONENTS
-        Core
-        Gui
-        Widgets
-)
+### Build ###
+string(TIMESTAMP CURRENT_TIME "%d-%m-%Y %H:%M:%S")
+set(BUILD_TIMESTAMP "${CURRENT_TIME}")
 
+### CPR Options ###
+set(BUILD_LIBCURL_DOCS OFF)
+set(ENABLE_CURL_MANUAL OFF)
+
+### Libraries ###
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/cpr)
 
+### Generate Build Config / Info file ###
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
 
-add_executable(Actinium
-        src/ui/dialog/launch_instance_dialog.cpp
-        src/ui/dialog/launch_instance_dialog.h
-        src/worker/worker.h
-        src/util/github.cpp
-        src/util/github.h
-        src/worker/task.h
-        src/worker/tasks/download_loader_task.cpp
-        src/worker/tasks/download_loader_task.h)
+### Executable ###
+add_executable(Actinium)
 
+### Source ###
 target_sources(Actinium PRIVATE
         src/main.cpp
         src/core/application.cpp
@@ -104,11 +99,20 @@ target_sources(Actinium PRIVATE
         src/ui/widget/sidebar.h
         src/ui/window/instance_window.cpp
         src/ui/window/instance_window.h
-        ${CMAKE_CURRENT_BINARY_DIR}/build_config.h
+        src/ui/dialog/launch_instance_dialog.cpp
+        src/ui/dialog/launch_instance_dialog.h
+        src/worker/worker.h
+        src/util/github.cpp
+        src/util/github.h
+        src/worker/task.h
+        src/worker/tasks/download_loader_task.cpp
+        src/worker/tasks/download_loader_task.h
 )
 
+### Defines ###
 target_compile_definitions(Actinium PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 
+### Link Libraries ###
 target_link_libraries(Actinium
         Qt6::Core
         Qt6::Gui
@@ -118,11 +122,13 @@ target_link_libraries(Actinium
         cpr::cpr
 )
 
+### Inclusions ###
 target_include_directories(Actinium PRIVATE
         src/
         "${CMAKE_CURRENT_BINARY_DIR}/build/"
 )
 
+### Copy Resources to binary directory ###
 add_custom_target(TARGET Actinium POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy_directory
         "${CMAKE_CURRENT_LIST_DIR}/resources"
