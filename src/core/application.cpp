@@ -13,6 +13,7 @@
 #include <QStandardPaths>
 #include <filesystem>
 #include <spdlog/spdlog.h>
+
 namespace Actinium
 {
     Application::Application(int argc, char* argv[])
