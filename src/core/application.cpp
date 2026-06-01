@@ -1,5 +1,9 @@
 #include "application.h"
 
+#ifdef WIN32
+#include "util/win.h"
+#endif
+
 #include "build_config.h"
 #include "ui/dialog/launch_instance_dialog.h"
 #include "util/qt.h"
@@ -9,7 +13,6 @@
 #include <QStandardPaths>
 #include <filesystem>
 #include <spdlog/spdlog.h>
-
 namespace Actinium
 {
     Application::Application(int argc, char* argv[])
@@ -47,6 +50,16 @@ namespace Actinium
     int Application::Run() const
     {
         m_main_window->show();
+
+#ifdef WIN32
+        if (WinUtils::HasElevatedPrivileges())
+        {
+            QMessageBox::warning(m_main_window, "Warning",
+                "The application is running with administrator privileges. This is not recommended unless necessary. "
+                "Please run without elevated permissions whenever possible.",
+                QMessageBox::Ok);
+        }
+#endif
 
         return exec();
     }

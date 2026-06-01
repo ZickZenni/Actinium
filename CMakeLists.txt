@@ -109,6 +109,13 @@ target_sources(Actinium PRIVATE
         src/worker/tasks/download_loader_task.h
 )
 
+if (WIN32)
+    target_sources(Actinium PRIVATE
+            src/util/win.cpp
+            src/util/win.h
+    )
+endif ()
+
 ### Defines ###
 target_compile_definitions(Actinium PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 
