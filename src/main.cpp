@@ -1,12 +1,15 @@
 #include "core/application.h"
 
-int main(int argc, char* argv[])
+int main(const int argc, char* argv[])
 {
-    Actinium::GApp = new Actinium::Application(argc, argv);
+    Actinium::Application app(argc, argv);
 
-    const auto result = Actinium::GApp->Run();
+    // ReSharper disable once CppDFALocalValueEscapesFunction
+    Actinium::GApp = &app;
 
-    delete Actinium::GApp;
+    const auto result = app.Run();
+
+    Actinium::GApp = nullptr;
 
     return result;
 }
