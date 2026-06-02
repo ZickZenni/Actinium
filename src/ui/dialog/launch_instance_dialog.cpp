@@ -1,6 +1,7 @@
 // ReSharper disable CppDFAMemoryLeak
 #include "launch_instance_dialog.h"
 
+#include "core/application.h"
 #include "task/download_libraries_task.h"
 #include "task/download_loader_task.h"
 #include "util/api/github.h"
@@ -29,8 +30,7 @@ namespace Actinium
 
         std::vector<Task*> tasks;
         tasks.push_back(new DownloadLoaderTask(instance->GetAbsolutePath(), m_worker));
-        tasks.push_back(
-            new DownloadLibrariesTask({ GitHub::Repo { .owner = "leotorrez", .name = "ZZMI-Package" } }, m_worker));
+        tasks.push_back(new DownloadLibrariesTask(instance->GetGame()->GetLibraries(), m_worker));
 
         m_worker->SetTasks(tasks);
         m_worker->moveToThread(m_worker_thread);

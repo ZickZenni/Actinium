@@ -17,6 +17,15 @@
 
 namespace Actinium
 {
+    std::vector<Game> Application::GAMES = {
+        Game("genshin_impact", "Genshin Impact",
+            { GitHub::Repo { .owner = "SilentNightSound", .name = "GIMI-Package" } }),
+        Game(
+            "honkai_star_rail", "Honkai Star Rail", { GitHub::Repo { .owner = "SpectrumQT", .name = "SRMI-Package" } }),
+        Game("zenless_zone_zero", "Zenless Zone Zero",
+            { GitHub::Repo { .owner = "leotorrez", .name = "ZZMI-Package" } }),
+    };
+
     Application::Application(int argc, char* argv[])
         : QApplication(argc, argv)
         , m_main_window(nullptr)
@@ -101,7 +110,7 @@ namespace Actinium
         return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString();
     }
 
-    const Game* Application::GetGameById(const std::string& id)
+    Game* Application::GetGameById(const std::string& id)
     {
         const auto result = std::ranges::find_if(GAMES,
             [&id](const auto& v)
@@ -109,7 +118,7 @@ namespace Actinium
                 return v.GetId() == id;
             });
 
-        return result != GAMES.end() ? result : nullptr;
+        return result != GAMES.end() ? std::to_address(result) : nullptr;
     }
 
     void Application::LoadInstances()

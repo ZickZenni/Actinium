@@ -11,8 +11,8 @@ namespace Actinium
     public:
         std::string name;
 
-        explicit Instance(const Game *game, std::string name);
-        explicit Instance(const Game *game, std::string name, const std::string &directory_name);
+        explicit Instance(Game *game, std::string name);
+        explicit Instance(Game *game, std::string name, const std::string &directory_name);
 
         /**
          * Saves all instances data to the disk.
@@ -35,7 +35,7 @@ namespace Actinium
         /**
          * Retrieves the game that the instance is for.
          */
-        [[nodiscard]] const Game *GetGame() const
+        [[nodiscard]] Game *GetGame() const
         {
             return m_game;
         }
@@ -52,6 +52,6 @@ namespace Actinium
 
     private:
         std::string m_directory_name;
-        const Game *m_game;
+        Game *m_game;
     };
 }

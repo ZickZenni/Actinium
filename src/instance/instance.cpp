@@ -11,12 +11,12 @@
 
 namespace Actinium
 {
-    Instance::Instance(const Game* game, std::string name)
+    Instance::Instance(Game* game, std::string name)
         : Instance(game, std::move(name), Path::SanitizeName(name))
     {
     }
 
-    Instance::Instance(const Game* game, std::string name, const std::string& directory_name)
+    Instance::Instance(Game* game, std::string name, const std::string& directory_name)
         : name(std::move(name))
         , m_directory_name(directory_name)
         , m_game(game)

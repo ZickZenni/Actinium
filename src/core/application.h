@@ -3,6 +3,7 @@
 #include "game/game.h"
 #include "instance/instance.h"
 #include "ui/window/main_window.h"
+#include "util/api/github.h"
 
 #include <QApplication>
 #include <filesystem>
@@ -25,7 +26,7 @@ namespace Actinium
         /**
          * Launches an instance.
          */
-        void LaunchInstance(Instance* instance);
+        void LaunchInstance(Instance *instance);
 
         /**
          * Retrieves the appdata path for the application.
@@ -35,7 +36,7 @@ namespace Actinium
         /**
          * Retrieves all supported games.
          */
-        static constexpr std::span<const Game> GetSupportedGames()
+        static const std::vector<Game>& GetSupportedGames()
         {
             return GAMES;
         }
@@ -43,14 +44,10 @@ namespace Actinium
         /**
          * Retrieves a support game by its identifier.
          */
-        static const Game *GetGameById(const std::string &id);
+        static Game* GetGameById(const std::string &id);
 
     private:
-        static constexpr std::array GAMES = {
-            Game("genshin_impact", "Genshin Impact"),
-            Game("honkai_star_rail", "Honkai Star Rail"),
-            Game("zenless_zone_zero", "Zenless Zone Zero"),
-        };
+        static std::vector<Game> GAMES;
 
         std::vector<Instance *> m_instances;
 
