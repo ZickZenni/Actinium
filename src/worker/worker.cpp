@@ -27,6 +27,8 @@ namespace Actinium
 
     void Worker::Run()
     {
+        emit ProgressChanged(0);
+
         const auto per_task = static_cast<int>(100 / m_tasks.size());
         auto index = 0;
 
