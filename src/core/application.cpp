@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QScreen>
 #include <QStandardPaths>
+#include <QStyleFactory>
 #include <filesystem>
 #include <spdlog/spdlog.h>
 
@@ -20,6 +21,7 @@ namespace Actinium
         : QApplication(argc, argv)
         , m_main_window(nullptr)
     {
+        setStyle(QStyleFactory::create("Fusion"));
         setOrganizationName("ZickZenni");
         setOrganizationDomain("https://github.com/ZickZenni");
         setApplicationName("actinium");
