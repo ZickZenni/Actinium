@@ -86,8 +86,8 @@ target_sources(Actinium PRIVATE
         src/ui/dialog/create_instance_dialog.cpp
         src/ui/dialog/create_instance_dialog.h
         src/util/json.h
-        src/util/path.h
-        src/util/path.cpp
+        src/util/fs/path.h
+        src/util/fs/path.cpp
         src/ui/model/instance_model.cpp
         src/ui/model/instance_model.h
         src/ui/view/instance_view.cpp
@@ -111,6 +111,7 @@ target_sources(Actinium PRIVATE
         src/util/archive.cpp
         src/util/archive.h
         src/worker/worker.cpp
+        src/util/fs/temp_file.h
 )
 
 if (WIN32)

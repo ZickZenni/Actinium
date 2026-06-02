@@ -18,7 +18,7 @@ namespace Actinium
     private:
         static std::vector<GitHub::Release> s_cached_releases;
 
-        int m_last_progress = -1;
+        int m_last_progress;
         std::filesystem::path m_path;
 
         static bool OnDownloadProgress(cpr::cpr_pf_arg_t download_total, cpr::cpr_pf_arg_t download_now,
