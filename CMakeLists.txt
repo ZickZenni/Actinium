@@ -62,6 +62,7 @@ set(ENABLE_CURL_MANUAL OFF)
 
 ### Libraries ###
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(LibArchive REQUIRED)
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/cpr)
@@ -107,6 +108,8 @@ target_sources(Actinium PRIVATE
         src/worker/task.h
         src/worker/tasks/download_loader_task.cpp
         src/worker/tasks/download_loader_task.h
+        src/util/archive.cpp
+        src/util/archive.h
 )
 
 if (WIN32)
@@ -127,6 +130,7 @@ target_link_libraries(Actinium
         nlohmann_json
         spdlog::spdlog
         cpr::cpr
+        LibArchive::LibArchive
 )
 
 ### Inclusions ###

@@ -1,5 +1,7 @@
 #include "path.h"
 
+#include <random>
+
 namespace Actinium
 {
     const std::unordered_set<std::string> PathUtils::RESERVED
@@ -62,5 +64,23 @@ namespace Actinium
         }
 
         return result;
+    }
+
+    std::filesystem::path PathUtils::CreateTempFilePath()
+    {
+        static std::random_device random_device;
+        static std::mt19937 generator(random_device());
+        static std::uniform_int_distribution<uint64_t> distribution;
+
+        const auto temp_dir = std::filesystem::temp_directory_path();
+
+        auto temp_file_path = temp_dir / std::to_string(distribution(generator));
+
+        while (std::filesystem::exists(temp_file_path))
+        {
+            temp_file_path = temp_dir / std::to_string(distribution(generator));
+        }
+
+        return temp_file_path;
     }
 }
