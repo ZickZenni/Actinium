@@ -8,19 +8,13 @@
 #define qstr(x) x.toStdString()
 #define strq(x) QString::fromStdString(x)
 
-namespace Actinium
+namespace Actinium::QT
 {
-    class QTUtils
-    {
-    public:
-        QTUtils() = delete;
+    QSize ViewItemTextSize(const QStyleOptionViewItem &option);
 
-        static QSize ViewItemTextSize(const QStyleOptionViewItem &option);
+    void ViewItemTextLayout(QTextLayout &layout, int lineWidth, qreal &height, qreal &used_width);
 
-        static void ViewItemTextLayout(QTextLayout &layout, int lineWidth, qreal &height, qreal &used_width);
+    QStyle *GetCorrectStyle(const QStyleOptionViewItem &option);
 
-        static QStyle *GetCorrectStyle(const QStyleOptionViewItem &option);
-
-        static QUrl CreateFileUrl(const std::filesystem::path &path);
-    };
+    QUrl CreateFileUrl(const std::filesystem::path &path);
 }

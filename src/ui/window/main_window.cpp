@@ -274,13 +274,13 @@ namespace Actinium
             return;
         }
 
-        const auto url = QTUtils::CreateFileUrl(instance->GetAbsolutePath());
+        const auto url = QT::CreateFileUrl(instance->GetAbsolutePath());
         SPDLOG_DEBUG("Opening url: {}", url.toEncoded().toStdString());
 
         QDesktopServices::openUrl(url);
     }
 
-    void MainWindow::OnInstanceSelected(const QModelIndex& index) const
+    void MainWindow::OnInstanceSelected([[maybe_unused]] const QModelIndex& index) const
     {
         const auto instance = GetSelectedInstance();
 

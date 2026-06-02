@@ -27,7 +27,7 @@ namespace Actinium
         opt.textElideMode = Qt::ElideRight;
         opt.displayAlignment = Qt::AlignTop | Qt::AlignHCenter;
 
-        const auto style = QTUtils::GetCorrectStyle(opt);
+        const auto style = QT::GetCorrectStyle(opt);
         const auto text_margin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, nullptr, opt.widget) + 1;
 
         auto text_rect = opt.rect;
@@ -89,7 +89,7 @@ namespace Actinium
         text_layout.setText(opt.text);
 
         qreal width, height;
-        QTUtils::ViewItemTextLayout(text_layout, text_rect.width(), height, width);
+        QT::ViewItemTextLayout(text_layout, text_rect.width(), height, width);
 
         {
             const int line_count = text_layout.lineCount();
@@ -117,9 +117,9 @@ namespace Actinium
         opt.textElideMode = Qt::ElideRight;
         opt.displayAlignment = Qt::AlignTop | Qt::AlignHCenter;
 
-        const auto style = QTUtils::GetCorrectStyle(opt);
+        const auto style = QT::GetCorrectStyle(opt);
         const auto text_margin = style->pixelMetric(QStyle::PM_FocusFrameHMargin, &option, opt.widget) + 1;
-        const auto text_size = QTUtils::ViewItemTextSize(opt);
+        const auto text_size = QT::ViewItemTextSize(opt);
         const auto height = ICON_SIZE + text_margin * 2 + 5 + text_size.height();
 
         return { ITEM_SIZE, height };

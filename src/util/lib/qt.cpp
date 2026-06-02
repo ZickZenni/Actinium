@@ -1,8 +1,8 @@
 #include "qt.h"
 
-namespace Actinium
+namespace Actinium::QT
 {
-    QSize QTUtils::ViewItemTextSize(const QStyleOptionViewItem& option)
+    QSize ViewItemTextSize(const QStyleOptionViewItem& option)
     {
         const auto style = GetCorrectStyle(option);
 
@@ -24,7 +24,7 @@ namespace Actinium
         return { size.width() + 2 * text_margin, size.height() };
     }
 
-    void QTUtils::ViewItemTextLayout(QTextLayout& layout, const int lineWidth, qreal& height, qreal& used_width)
+    void ViewItemTextLayout(QTextLayout& layout, const int lineWidth, qreal& height, qreal& used_width)
     {
         height = 0;
         used_width = 0;
@@ -54,12 +54,12 @@ namespace Actinium
         layout.endLayout();
     }
 
-    QStyle* QTUtils::GetCorrectStyle(const QStyleOptionViewItem& option)
+    QStyle* GetCorrectStyle(const QStyleOptionViewItem& option)
     {
         return option.widget ? option.widget->style() : QApplication::style();
     }
 
-    QUrl QTUtils::CreateFileUrl(const std::filesystem::path& path)
+    QUrl CreateFileUrl(const std::filesystem::path& path)
     {
         return QUrl::fromLocalFile(strq(path.string()));
     }
