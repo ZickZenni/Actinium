@@ -52,7 +52,7 @@ namespace Actinium
 
         SPDLOG_INFO("Downloading loader version \"{}\"...", release.tag_name);
 
-        TempFile tmp_file(PathUtils::CreateTempFilePath());
+        TempFile tmp_file(Path::CreateTempFilePath());
         std::ofstream out(tmp_file.GetPath(), std::ios::binary);
 
         if (!out)

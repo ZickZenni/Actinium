@@ -12,7 +12,7 @@
 namespace Actinium
 {
     Instance::Instance(const Game* game, std::string name)
-        : Instance(game, std::move(name), PathUtils::SanitizeName(name))
+        : Instance(game, std::move(name), Path::SanitizeName(name))
     {
     }
 
