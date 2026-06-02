@@ -112,6 +112,10 @@ target_sources(Actinium PRIVATE
         src/util/lib/archive.h
         src/worker/worker.cpp
         src/util/fs/temp_file.h
+        src/task/download_task.cpp
+        src/task/download_task.h
+        src/task/download_libraries_task.cpp
+        src/task/download_libraries_task.h
 )
 
 if (WIN32)

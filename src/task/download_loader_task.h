@@ -1,14 +1,14 @@
 #pragma once
 
+#include "download_task.h"
 #include "task.h"
 #include "util/api/github.h"
 
-#include <cpr/cpr.h>
 #include <filesystem>
 
 namespace Actinium
 {
-    class DownloadLoaderTask : public Task
+    class DownloadLoaderTask : public DownloadTask
     {
     public:
         explicit DownloadLoaderTask(const std::filesystem::path &path, Worker *worker);
@@ -16,12 +16,8 @@ namespace Actinium
         void Run() override;
 
     private:
-        static std::vector<GitHub::Release> s_cached_releases;
-
-        int m_last_progress;
         std::filesystem::path m_path;
 
-        static bool OnDownloadProgress(cpr::cpr_pf_arg_t download_total, cpr::cpr_pf_arg_t download_now,
-            cpr::cpr_pf_arg_t upload_total, cpr::cpr_pf_arg_t upload_now, intptr_t user_data);
+        static bool IsLoaderAsset(const GitHub::Asset& asset);
     };
 }

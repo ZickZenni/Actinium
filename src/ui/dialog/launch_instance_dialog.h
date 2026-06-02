@@ -24,5 +24,7 @@ namespace Actinium
         Worker *m_worker;
 
         void Abort() const;
+
+        void PrepareUI();
     };
 }
