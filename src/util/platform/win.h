@@ -1,15 +1,9 @@
 #pragma once
 
-namespace Actinium
+namespace Actinium::Windows
 {
-    class WinUtils
-    {
-    public:
-        WinUtils() = delete;
-
-        /**
-         * Checks if the current process has elevated privileges.
-         */
-        static bool HasElevatedPrivileges();
-    };
+    /**
+     * Checks if the current process has elevated privileges.
+     */
+    bool HasElevatedPrivileges();
 }

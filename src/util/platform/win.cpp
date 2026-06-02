@@ -2,9 +2,9 @@
 
 #include <windows.h>
 
-namespace Actinium
+namespace Actinium::Windows
 {
-    bool WinUtils::HasElevatedPrivileges()
+    bool HasElevatedPrivileges()
     {
         static SID_IDENTIFIER_AUTHORITY NT_AUTHORITY = SECURITY_NT_AUTHORITY;
 

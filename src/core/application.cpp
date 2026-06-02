@@ -55,7 +55,7 @@ namespace Actinium
         m_main_window->show();
 
 #ifdef WIN32
-        if (WinUtils::HasElevatedPrivileges())
+        if (Windows::HasElevatedPrivileges())
         {
             QMessageBox::warning(m_main_window, "Warning",
                 "The application is running with administrator privileges. This is not recommended unless necessary. "
