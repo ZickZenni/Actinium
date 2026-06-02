@@ -11,20 +11,12 @@ namespace Actinium
         Q_OBJECT
 
     public:
-        explicit Worker(QObject *parent = nullptr)
-            : QObject(parent)
-        {
-        }
+        explicit Worker(QObject *parent = nullptr);
+        ~Worker() override;
 
-        void SetTasks(std::vector<Task *> tasks)
-        {
-            m_tasks = std::move(tasks);
-        }
+        void Abort();
 
-        void Abort()
-        {
-            m_aborted.store(true);
-        }
+        void SetTasks(std::vector<Task *> tasks);
 
         [[nodiscard]] bool IsAborted() const
         {
@@ -32,19 +24,11 @@ namespace Actinium
         }
 
     public slots:
-        void Run()
-        {
-            for (const auto &task : m_tasks)
-            {
-                task->Run();
-            }
-
-            QThread::msleep(50);
-            emit Finished();
-        }
+        void Run();
 
     signals:
         void ProgressChanged(int value);
+        void TaskProgressChanged(int value, int total);
         void Finished();
         void Error(const std::string &message);
         void Aborted();

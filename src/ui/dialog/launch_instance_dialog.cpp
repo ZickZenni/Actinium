@@ -27,12 +27,16 @@ namespace Actinium
         m_progress_bar = new QProgressBar(this);
         m_progress_bar->setRange(0, 100);
 
+        m_task_progress_bar = new QProgressBar(this);
+        m_task_progress_bar->setRange(0, 100);
+
         m_abort_button = new QPushButton("Abort", this);
         connect(m_abort_button, &QPushButton::clicked, this, &LaunchInstanceDialog::Abort);
 
         auto* layout = new QVBoxLayout(this);
         layout->addWidget(label);
         layout->addWidget(m_progress_bar);
+        layout->addWidget(m_task_progress_bar);
         layout->addWidget(m_abort_button);
 
         m_worker_thread = new QThread(this);
@@ -44,6 +48,12 @@ namespace Actinium
             [this](int progress)
             {
                 m_progress_bar->setValue(progress);
+            });
+        connect(m_worker, &Worker::TaskProgressChanged, this,
+            [this](int progress, int total)
+            {
+                m_task_progress_bar->setMaximum(total);
+                m_task_progress_bar->setValue(progress);
             });
         connect(m_worker, &Worker::Finished, this,
             [this]
@@ -84,7 +94,7 @@ namespace Actinium
         delete m_worker_thread;
     }
 
-    void LaunchInstanceDialog::Abort()
+    void LaunchInstanceDialog::Abort() const
     {
         SPDLOG_INFO("Aborting launch...");
 

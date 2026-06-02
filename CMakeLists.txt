@@ -110,6 +110,7 @@ target_sources(Actinium PRIVATE
         src/worker/tasks/download_loader_task.h
         src/util/archive.cpp
         src/util/archive.h
+        src/worker/worker.cpp
 )
 
 if (WIN32)

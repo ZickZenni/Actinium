@@ -83,7 +83,7 @@ namespace Actinium
             return;
         }
 
-        emit m_worker->ProgressChanged(100);
+        emit m_worker->TaskProgressChanged(100, 100);
         SPDLOG_INFO("Downloaded loader version \"{}\"", release.tag_name);
 
         const auto [code, message] = ArchiveUtils::ExtractArchive(temp_file_path, Application::GetAppDataPath() / "loader" / "3dmigoto" / release.tag_name);
@@ -114,7 +114,7 @@ namespace Actinium
 
             if (_this->m_last_progress != progress)
             {
-                emit _this->m_worker->ProgressChanged(progress);
+                emit _this->m_worker->TaskProgressChanged(progress, 100);
 
                 _this->m_last_progress = progress;
             }
