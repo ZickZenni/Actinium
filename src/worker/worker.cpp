@@ -32,6 +32,11 @@ namespace Actinium
 
         for (const auto& task : m_tasks)
         {
+            if (IsAborted())
+            {
+                return;
+            }
+
             emit TaskProgressChanged(0, 100);
 
             task->Run();

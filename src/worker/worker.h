@@ -14,16 +14,28 @@ namespace Actinium
         explicit Worker(QObject *parent = nullptr);
         ~Worker() override;
 
+        /**
+         * Aborts the current task and all other queued tasks.
+         */
         void Abort();
 
+        /**
+         * Sets the list of tasks to be executed.
+         */
         void SetTasks(std::vector<Task *> tasks);
 
+        /**
+         * Checks if the worker is set to abort all operations.
+         */
         [[nodiscard]] bool IsAborted() const
         {
             return m_aborted.load();
         }
 
     public slots:
+        /**
+         * Executes all queued tasks.
+         */
         void Run();
 
     signals:
