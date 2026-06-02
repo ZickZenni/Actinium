@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/github.h"
-#include "worker/task.h"
+#include "task.h"
+#include "util/api/github.h"
 
 #include <cpr/cpr.h>
 #include <filesystem>

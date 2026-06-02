@@ -1,10 +1,10 @@
 #include "download_loader_task.h"
 
-#include "../../util/fs/path.h"
 #include "core/application.h"
-#include "util/archive.h"
+#include "util/api/github.h"
+#include "util/fs/path.h"
 #include "util/fs/temp_file.h"
-#include "util/github.h"
+#include "util/lib/archive.h"
 #include "worker/worker.h"
 
 #include <spdlog/spdlog.h>

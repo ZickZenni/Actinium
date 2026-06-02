@@ -1,6 +1,6 @@
 #include "github.h"
 
-#include "json.h"
+#include "util/lib/json.h"
 
 #include <cpr/cpr.h>
 #include <spdlog/spdlog.h>

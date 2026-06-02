@@ -85,7 +85,7 @@ target_sources(Actinium PRIVATE
         src/game/game.h
         src/ui/dialog/create_instance_dialog.cpp
         src/ui/dialog/create_instance_dialog.h
-        src/util/json.h
+        src/util/lib/json.h
         src/util/fs/path.h
         src/util/fs/path.cpp
         src/ui/model/instance_model.cpp
@@ -94,8 +94,8 @@ target_sources(Actinium PRIVATE
         src/ui/view/instance_view.h
         src/ui/delegate/instance_delegate.cpp
         src/ui/delegate/instance_delegate.h
-        src/util/qt.h
-        src/util/qt.cpp
+        src/util/lib/qt.h
+        src/util/lib/qt.cpp
         src/ui/widget/sidebar.cpp
         src/ui/widget/sidebar.h
         src/ui/window/instance_window.cpp
@@ -103,21 +103,21 @@ target_sources(Actinium PRIVATE
         src/ui/dialog/launch_instance_dialog.cpp
         src/ui/dialog/launch_instance_dialog.h
         src/worker/worker.h
-        src/util/github.cpp
-        src/util/github.h
-        src/worker/task.h
-        src/worker/tasks/download_loader_task.cpp
-        src/worker/tasks/download_loader_task.h
-        src/util/archive.cpp
-        src/util/archive.h
+        src/util/api/github.cpp
+        src/util/api/github.h
+        src/task/task.h
+        src/task/download_loader_task.cpp
+        src/task/download_loader_task.h
+        src/util/lib/archive.cpp
+        src/util/lib/archive.h
         src/worker/worker.cpp
         src/util/fs/temp_file.h
 )
 
 if (WIN32)
     target_sources(Actinium PRIVATE
-            src/util/win.cpp
-            src/util/win.h
+            src/util/platform/win.cpp
+            src/util/platform/win.h
     )
 endif ()
 

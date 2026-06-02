@@ -1,9 +1,9 @@
 // ReSharper disable CppDFAMemoryLeak
 #include "launch_instance_dialog.h"
 
-#include "util/github.h"
-#include "util/qt.h"
-#include "worker/tasks/download_loader_task.h"
+#include "task/download_loader_task.h"
+#include "util/api/github.h"
+#include "util/lib/qt.h"
 
 #include <QLabel>
 #include <QMessageBox>

@@ -1,12 +1,12 @@
 #include "application.h"
 
 #ifdef WIN32
-#include "util/win.h"
+#include "util/platform/win.h"
 #endif
 
 #include "build_config.h"
 #include "ui/dialog/launch_instance_dialog.h"
-#include "util/qt.h"
+#include "util/lib/qt.h"
 
 #include <QMessageBox>
 #include <QScreen>

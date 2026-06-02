@@ -4,7 +4,7 @@
 #include "core/application.h"
 #include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
-#include "util/qt.h"
+#include "util/lib/qt.h"
 
 #include <QCloseEvent>
 #include <QDesktopServices>

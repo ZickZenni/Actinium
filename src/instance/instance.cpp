@@ -1,8 +1,8 @@
 #include "instance.h"
 
-#include "../util/fs/path.h"
+#include "util/fs/path.h"
+#include "util/lib/json.h"
 #include "core/application.h"
-#include "util/json.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>

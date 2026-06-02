@@ -1,6 +1,6 @@
 #pragma once
 
-#include "task.h"
+#include "task/task.h"
 
 #include <QThread>
 
