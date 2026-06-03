@@ -76,7 +76,8 @@ namespace Actinium
                 return;
             }
 
-            std::filesystem::copy_file(config_path, m_instance->GetAbsolutePath() / "d3dx.ini");
+            std::filesystem::copy_file(config_path, m_instance->GetAbsolutePath() / "d3dx.ini",
+                std::filesystem::copy_options::overwrite_existing);
         }
     }
 }
