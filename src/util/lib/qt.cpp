@@ -63,4 +63,17 @@ namespace Actinium::QT
     {
         return QUrl::fromLocalFile(strq(path.string()));
     }
+
+    std::vector<std::string> ToStdVector(const QStringList& list)
+    {
+        std::vector<std::string> result;
+        result.reserve(list.size());
+
+        for (const auto& str : list)
+        {
+            result.emplace_back(str.toStdString());
+        }
+
+        return result;
+    }
 }

@@ -17,4 +17,6 @@ namespace Actinium::QT
     QStyle *GetCorrectStyle(const QStyleOptionViewItem &option);
 
     QUrl CreateFileUrl(const std::filesystem::path &path);
+
+    std::vector<std::string> ToStdVector(const QStringList &list);
 }
