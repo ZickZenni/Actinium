@@ -9,8 +9,10 @@
 
 namespace Actinium
 {
-    DownloadLibrariesTask::DownloadLibrariesTask(const std::vector<GitHub::Repo>& libraries, Worker* worker)
+    DownloadLibrariesTask::DownloadLibrariesTask(
+        Instance* instance, const std::vector<GitHub::Repo>& libraries, Worker* worker)
         : DownloadTask(worker)
+        , m_instance(instance)
         , m_libraries(libraries)
     {
     }
@@ -64,7 +66,17 @@ namespace Actinium
             if (code != ARCHIVE_OK)
             {
                 emit m_worker->Error(std::format("Archive extraction failed: {}", message));
+                return;
             }
+
+            const auto config_path = extract_path / "d3dx.ini";
+
+            if (!std::filesystem::exists(config_path))
+            {
+                return;
+            }
+
+            std::filesystem::copy_file(config_path, m_instance->GetAbsolutePath() / "d3dx.ini");
         }
     }
 }
