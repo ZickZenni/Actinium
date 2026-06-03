@@ -19,6 +19,9 @@ namespace Actinium
     LaunchInstanceDialog::LaunchInstanceDialog(Instance* instance, QWidget* parent)
         : QDialog(parent)
         , m_instance(instance)
+        , m_progress_bar(nullptr)
+        , m_task_progress_bar(nullptr)
+        , m_abort_button(nullptr)
         , m_worker_thread(new QThread(this))
         , m_worker(new Worker())
     {
