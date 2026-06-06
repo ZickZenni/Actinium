@@ -197,7 +197,7 @@ namespace Actinium
         return dialog.exec();
     }
 
-    int Application::LaunchGameWithLoader(Instance* instance, QWidget* parent)
+    int Application::LaunchGameWithLoader(const Instance* instance, QWidget* parent)
     {
 #ifdef WIN32
         if (!GetGameExecutable(instance->GetGame()->id).has_value())

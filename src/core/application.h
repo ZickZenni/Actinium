@@ -43,7 +43,7 @@ namespace Actinium
          *
          * @return Exit code for this process.
          */
-        int LaunchGameWithLoader(Instance *instance, QWidget *parent = nullptr);
+        int LaunchGameWithLoader(const Instance *instance, QWidget *parent = nullptr);
 
         /**
          * Retrieves the path to the game's executable file.
