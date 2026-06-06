@@ -7,6 +7,8 @@
 #include "util/lib/archive.h"
 #include "worker/worker.h"
 
+#include <spdlog/spdlog.h>
+
 namespace Actinium
 {
     DownloadLibrariesTask::DownloadLibrariesTask(
@@ -33,6 +35,19 @@ namespace Actinium
             }
 
             const auto& latest_version = versions.front();
+            const auto extract_path
+                = Application::GetAppDataPath() / "libraries" / owner / name / latest_version.version.to_string();
+
+            if (std::filesystem::exists(extract_path))
+            {
+                emit m_worker->TaskProgressChanged(100, 100);
+
+                CopyMissingConfigurationFile(m_instance, extract_path / "d3dx.ini");
+
+                SPDLOG_INFO("Library \"{}/{}\" version \"{}\" already downloaded", owner, name,
+                    latest_version.version.to_string());
+                return;
+            }
 
             const TempFile temp_file(Path::CreateTempFilePath());
             std::ofstream out(temp_file.GetPath(), std::ios::binary);
@@ -60,8 +75,6 @@ namespace Actinium
 
             emit m_worker->TaskProgressChanged(100, 100);
 
-            const auto extract_path
-                = Application::GetAppDataPath() / "libraries" / owner / name / latest_version.version.to_string();
             const auto [code, message] = ArchiveUtils::ExtractArchive(temp_file.GetPath(), extract_path);
 
             if (code != ARCHIVE_OK)
@@ -70,15 +83,20 @@ namespace Actinium
                 return;
             }
 
-            const auto config_path = extract_path / "d3dx.ini";
-
-            if (!std::filesystem::exists(config_path))
-            {
-                return;
-            }
-
-            std::filesystem::copy_file(config_path, m_instance->GetAbsolutePath() / "d3dx.ini",
-                std::filesystem::copy_options::overwrite_existing);
+            CopyMissingConfigurationFile(m_instance, extract_path / "d3dx.ini");
         }
+    }
+
+    void DownloadLibrariesTask::CopyMissingConfigurationFile(
+        const Instance* instance, const std::filesystem::path& source)
+    {
+        const auto& instance_config_path = instance->GetAbsolutePath() / "d3dx.ini";
+
+        if (!std::filesystem::exists(source) || std::filesystem::exists(instance_config_path))
+        {
+            return;
+        }
+
+        std::filesystem::copy_file(source, instance_config_path);
     }
 }

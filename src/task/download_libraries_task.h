@@ -15,5 +15,7 @@ namespace Actinium
     private:
         Instance* m_instance;
         std::vector<LoaderLibrary> m_libraries;
+
+        static void CopyMissingConfigurationFile(const Instance * instance, const std::filesystem::path &source);
     };
 }
