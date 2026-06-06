@@ -4,6 +4,8 @@
 
 namespace Actinium
 {
+    constexpr auto MIGOTO_PROCESS_ALREADY_RUNNING = UINT64_MAX;
+
     class MigotoLoader
     {
     public:

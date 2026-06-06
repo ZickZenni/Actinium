@@ -235,7 +235,7 @@ namespace Actinium
 
         if (Windows::IsProcessRunning(game_executable_path.value().filename().string()))
         {
-            return UINT64_MAX;
+            return MIGOTO_PROCESS_ALREADY_RUNNING;
         }
 
         SHELLEXECUTEINFOW exec_info = {};
@@ -282,7 +282,7 @@ namespace Actinium
 
         if (Windows::IsProcessRunning(game->executable_name))
         {
-            return UINT64_MAX;
+            return MIGOTO_PROCESS_ALREADY_RUNNING;
         }
 
         std::vector<std::string> start_parameters;

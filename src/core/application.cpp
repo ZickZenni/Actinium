@@ -238,7 +238,7 @@ namespace Actinium
         /**
          * The game is already running.
          */
-        if (process_id == UINT64_MAX)
+        if (process_id == MIGOTO_PROCESS_ALREADY_RUNNING)
         {
             return 0;
         }
