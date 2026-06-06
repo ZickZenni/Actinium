@@ -354,38 +354,38 @@ namespace Actinium
 
     bool MigotoLoader::PrepareLibraries(const Instance* instance, const std::filesystem::path& loader_path)
     {
-        const auto& loader_shader_fixes_path = loader_path / "ShaderFixes";
+        const auto& loader_shader_fixes_directory = loader_path / "ShaderFixes";
 
-        for (auto& library : instance->GetGame()->libraries)
+        for (auto& game_library : instance->GetGame()->libraries)
         {
-            const auto& repo_location = library.GetRepositoryLocation();
-            const auto& versions = library.GetVersions();
+            const auto& library_repository = game_library.GetRepositoryLocation();
+            const auto& library_versions = game_library.GetVersions();
 
-            if (versions.empty())
+            if (library_versions.empty())
             {
-                SPDLOG_WARN("No library versions were retrieved ({}/{})", repo_location.owner, repo_location.name);
+                SPDLOG_WARN(
+                    "No library versions were retrieved ({}/{})", library_repository.owner, library_repository.name);
                 continue;
             }
 
-            const auto& latest_library_version = versions.front();
-            const auto& library_path = latest_library_version.path;
+            const auto& latest_library_version = library_versions.front();
+            const auto& library_directory = latest_library_version.path;
 
-            if (!std::filesystem::exists(library_path))
+            if (!std::filesystem::exists(library_directory))
             {
-                SPDLOG_WARN("Library path points to a non-existing directory \"{}\"", library_path.string());
+                SPDLOG_WARN("Library path points to a non-existing directory \"{}\"", library_directory.string());
                 continue;
             }
 
-            const auto& library_loader_directory_name
-                = Path::SanitizeName(repo_location.owner + "." + repo_location.name);
+            const auto& library_link_name
+                = Path::SanitizeName(library_repository.owner + "." + library_repository.name);
+            EnsureSymlink(library_directory, loader_path / "Libraries" / library_link_name);
 
-            EnsureSymlink(library_path, loader_path / "Libraries" / library_loader_directory_name);
+            const auto& library_shader_fixes_directory = library_directory / "ShaderFixes";
 
-            const auto& library_shader_fixes = library_path / "ShaderFixes";
-
-            if (std::filesystem::exists(library_shader_fixes))
+            if (std::filesystem::exists(library_shader_fixes_directory))
             {
-                EnsureSymlink(library_shader_fixes, loader_shader_fixes_path / library_loader_directory_name);
+                EnsureSymlink(library_shader_fixes_directory, loader_shader_fixes_directory / library_link_name);
             }
         }
 
