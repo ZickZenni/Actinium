@@ -4,7 +4,6 @@
 #include "util/fs/path.h"
 #include "util/fs/symlink.h"
 #include "util/platform/win.h"
-#include "util/software/steam.h"
 
 #include <semver.hpp>
 #include <spdlog/spdlog.h>
@@ -88,6 +87,8 @@ namespace Actinium
         std::filesystem::create_directories(loader_path / "ShaderCache");
         std::filesystem::create_directories(loader_path / "ShaderFixes");
         std::filesystem::create_directories(loader_path / "Libraries");
+
+        EnsureSymlink(instance->GetAbsolutePath() / "mods", loader_path / "Mods");
 
         return PrepareLibraries(instance, loader_path);
     }
