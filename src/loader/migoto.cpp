@@ -75,8 +75,8 @@ namespace Actinium
         }
 
         const auto& latest_version = loader_versions.front().tag_name;
-        const auto& game_directory_name = Path::SanitizeName(instance->GetGame()->name);
-        const auto& loader_path
+        const auto game_directory_name = Path::SanitizeName(instance->GetGame()->name);
+        const auto loader_path
             = Application::GetAppDataPath() / "loaders" / game_directory_name / "3dmigoto" / latest_version;
 
         if (!PrepareConfigurationFile(instance, loader_path))
@@ -226,7 +226,7 @@ namespace Actinium
     uint64_t MigotoLoader::StartGameNative(const Instance* instance)
     {
 #ifdef WIN32
-        const auto& game_executable_path = GApp->GetGameExecutable(instance->GetGame()->id);
+        const auto game_executable_path = GApp->GetGameExecutable(instance->GetGame()->id);
 
         if (!game_executable_path.has_value())
         {
@@ -273,7 +273,7 @@ namespace Actinium
             return 0;
         }
 
-        const auto& game = instance->GetGame();
+        const auto game = instance->GetGame();
 
         if (!game->steam_app_id.has_value())
         {
@@ -294,7 +294,7 @@ namespace Actinium
             start_parameters.push_back(parameter);
         }
 
-        const auto& parameters = Windows::BuildParameters(start_parameters);
+        const auto parameters = Windows::BuildParameters(start_parameters);
 
         SHELLEXECUTEINFOW exec_info = {};
         exec_info.cbSize = sizeof(SHELLEXECUTEINFOW);
@@ -334,8 +334,8 @@ namespace Actinium
 
     bool MigotoLoader::PrepareConfigurationFile(const Instance* instance, const std::filesystem::path& loader_path)
     {
-        const auto& loader_d3dini_path = loader_path / "d3dx.ini";
-        const auto& instance_d3dini_path = instance->GetAbsolutePath() / "d3dx.ini";
+        const auto loader_d3dini_path = loader_path / "d3dx.ini";
+        const auto instance_d3dini_path = instance->GetAbsolutePath() / "d3dx.ini";
 
         if (!std::filesystem::exists(instance_d3dini_path))
         {
@@ -354,7 +354,7 @@ namespace Actinium
 
     bool MigotoLoader::PrepareLibraries(const Instance* instance, const std::filesystem::path& loader_path)
     {
-        const auto& loader_shader_fixes_directory = loader_path / "ShaderFixes";
+        const auto loader_shader_fixes_directory = loader_path / "ShaderFixes";
 
         for (auto& game_library : instance->GetGame()->libraries)
         {
@@ -377,11 +377,10 @@ namespace Actinium
                 continue;
             }
 
-            const auto& library_link_name
-                = Path::SanitizeName(library_repository.owner + "." + library_repository.name);
+            const auto library_link_name = Path::SanitizeName(library_repository.owner + "." + library_repository.name);
             EnsureSymlink(library_directory, loader_path / "Libraries" / library_link_name);
 
-            const auto& library_shader_fixes_directory = library_directory / "ShaderFixes";
+            const auto library_shader_fixes_directory = library_directory / "ShaderFixes";
 
             if (std::filesystem::exists(library_shader_fixes_directory))
             {
@@ -402,8 +401,8 @@ namespace Actinium
             }
             else
             {
-                const auto& bak_sufix = std::filesystem::is_directory(target) ? " bak" : ".bak";
-                const auto& bak_path
+                const auto bak_sufix = std::filesystem::is_directory(target) ? " bak" : ".bak";
+                const auto bak_path
                     = Path::CreateNonCollidingPath(target.parent_path() / (target.filename().string() + bak_sufix));
 
                 SPDLOG_WARN(
