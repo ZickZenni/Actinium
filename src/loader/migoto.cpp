@@ -5,6 +5,7 @@
 #include "util/fs/symlink.h"
 #include "util/platform/win.h"
 
+#include <SimpleIni.h>
 #include <semver.hpp>
 #include <spdlog/spdlog.h>
 
@@ -349,7 +350,60 @@ namespace Actinium
             return false;
         }
 
-        return true;
+        return ModifyConfigurationFile(instance);
+    }
+
+    bool MigotoLoader::ModifyConfigurationFile(const Instance* instance)
+    {
+        const auto d3dini_path = instance->GetAbsolutePath() / "d3dx.ini";
+
+        CSimpleIniA ini;
+        ini.SetUnicode();
+        ini.SetMultiKey(true);
+
+        if (ini.LoadFile(d3dini_path.string().c_str()) < 0)
+        {
+            SPDLOG_ERROR("Failed to load d3dx.ini");
+            return false;
+        }
+
+        ini.SetValue("Loader", "target", instance->GetGame()->executable_name.c_str());
+
+        CSimpleIniA::TNamesDepend include_keys;
+        ini.GetAllKeys("Include", include_keys);
+
+        /**
+         * We remove everything that was configured before, which isn't good if the user set something up.
+         * For now its okay per say, but that should be fixed.
+         */
+        for (const auto& key : include_keys)
+        {
+            ini.Delete("Include", key.pItem, false);
+        }
+
+        /**
+         * We mostly write back almost the same values that we deleted before but add obviously the correct paths
+         * directing to the libraries used.
+         */
+        for (const auto& library : instance->GetGame()->libraries)
+        {
+            const auto& library_repository = library.GetRepositoryLocation();
+            const auto library_directory_name
+                = Path::SanitizeName(library_repository.owner + "." + library_repository.name);
+            const auto library_main_file = library.GetMainLocation();
+
+            if (library_main_file.has_value())
+            {
+                ini.SetValue("Include", "include",
+                    std::format(R"(Libraries\{}\{})", library_directory_name, library_main_file.value()).c_str());
+            }
+        }
+
+        ini.SetValue("Include", "include_recursive", "Mods");
+        ini.SetValue("Include", "exclude_recursive", "DISABLED*");
+        ini.SetValue("Include", "exclude_recursive", "desktop.ini");
+
+        return ini.SaveFile(d3dini_path.string().c_str()) == SI_OK;
     }
 
     bool MigotoLoader::PrepareLibraries(const Instance* instance, const std::filesystem::path& loader_path)

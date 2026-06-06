@@ -82,6 +82,12 @@ namespace Actinium
         static bool PrepareConfigurationFile(const Instance *instance, const std::filesystem::path &loader_path);
 
         /**
+         * Modifies the configuration file so that the loader can run without any problems, e.g. setup paths directing
+         * to the libraries used.
+         */
+        static bool ModifyConfigurationFile(const Instance* instance);
+
+        /**
          * Prepares the libraries for the loader.
          */
         static bool PrepareLibraries(const Instance *instance, const std::filesystem::path &loader_path);

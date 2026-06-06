@@ -28,7 +28,11 @@ namespace Actinium
             .name = "Genshin Impact",
             .executable_name = "GenshinImpact.exe",
             .libraries = {
-                LoaderLibrary { "SilentNightSound", "GIMI-Package" },
+                LoaderLibrary { "SilentNightSound", "GIMI-Package", []
+                    {
+                        return R"(Core\GIMI\main.ini)";
+                    }
+                },
             },
             .steam_app_id = std::nullopt,
             .steam_start_parameters = {}
@@ -38,7 +42,11 @@ namespace Actinium
             .name = "Honkai Star Rail",
             .executable_name = "StarRail.exe",
             .libraries = {
-                LoaderLibrary { "SpectrumQT", "SRMI-Package" },
+                LoaderLibrary { "SpectrumQT", "SRMI-Package", []
+                    {
+                        return R"(Core\SRMI\main.ini)";
+                    }
+                },
             },
             .steam_app_id = std::nullopt,
             .steam_start_parameters = {}
@@ -48,7 +56,11 @@ namespace Actinium
             .name = "Zenless Zone Zero",
             .executable_name = "ZenlessZoneZero.exe",
             .libraries = {
-                LoaderLibrary { "leotorrez", "ZZMI-Package" },
+                LoaderLibrary { "leotorrez", "ZZMI-Package", []
+                    {
+                        return R"(Core\ZZMI\main.ini)";
+                    }
+                },
             },
             .steam_app_id = std::nullopt,
             .steam_start_parameters = {}
@@ -58,7 +70,11 @@ namespace Actinium
             .name = "Wuthering Waves",
             .executable_name = "Client-Win64-Shipping.exe",
             .libraries = {
-                LoaderLibrary { "SpectrumQT", "WWMI-Package" },
+                LoaderLibrary { "SpectrumQT", "WWMI-Package", []
+                    {
+                        return R"(Core\WWMI\WuWa-Model-Importer.ini)";
+                    }
+                },
             },
             .steam_app_id = 3513350,
             .steam_start_parameters = {
@@ -259,6 +275,7 @@ namespace Actinium
             return 0;
         }
 
+        SPDLOG_ERROR("Failed to inject loader into game process: {}", static_cast<int>(result));
         QMessageBox::critical(parent, "Error", "Failed to inject loader into game process.", QMessageBox::Close);
         return 1;
 #else

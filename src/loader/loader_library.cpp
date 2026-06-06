@@ -7,13 +7,16 @@
 
 namespace Actinium
 {
-    LoaderLibrary::LoaderLibrary(GitHub::RepoLocation repository_location)
+    LoaderLibrary::LoaderLibrary(
+        GitHub::RepoLocation repository_location, const LibraryMainLocationFunc& main_location_func)
         : m_repository_location(std::move(repository_location))
+        , m_main_location_func(main_location_func)
     {
     }
 
-    LoaderLibrary::LoaderLibrary(const std::string& repository_owner, const std::string& repository_name)
-        : LoaderLibrary({ repository_owner, repository_name })
+    LoaderLibrary::LoaderLibrary(const std::string& repository_owner, const std::string& repository_name,
+        const LibraryMainLocationFunc& main_location_func)
+        : LoaderLibrary({repository_owner, repository_name}, main_location_func)
     {
     }
 
@@ -74,5 +77,10 @@ namespace Actinium
         }
 
         return m_versions;
+    }
+
+    std::optional<std::string> LoaderLibrary::GetMainLocation() const
+    {
+        return m_main_location_func();
     }
 }

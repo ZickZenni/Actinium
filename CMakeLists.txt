@@ -67,6 +67,7 @@ add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/cpr)
 add_subdirectory(thirdparty/semver)
+add_subdirectory(thirdparty/simpleini)
 
 ### Generate Build Config / Info file ###
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
@@ -149,6 +150,7 @@ target_link_libraries(Actinium
         cpr::cpr
         LibArchive::LibArchive
         semver
+        SimpleIni::SimpleIni
 )
 
 ### Inclusions ###

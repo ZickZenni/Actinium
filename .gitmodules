@@ -10,3 +10,6 @@
 [submodule "thirdparty/semver"]
 	path = thirdparty/semver
 	url = https://github.com/Neargye/semver
+[submodule "thirdparty/simpleini"]
+	path = thirdparty/simpleini
+	url = https://github.com/brofield/simpleini.git
