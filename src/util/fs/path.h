@@ -31,4 +31,9 @@ namespace Actinium::Path
      * Creates a unique path to a file stored in the operating system's temporary directory.
      */
     std::filesystem::path CreateTempFilePath();
+
+    /**
+     * Generates a unique file path in case of name collisions.
+     */
+    std::filesystem::path CreateNonCollidingPath(const std::filesystem::path &desired_path);
 }

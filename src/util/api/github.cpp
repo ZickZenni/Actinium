@@ -7,9 +7,11 @@
 
 namespace Actinium
 {
+    const std::string API_BASE_URL = "https://api.github.com";
+
     std::vector<GitHub::Release> GitHub::GetReleases(const std::string& owner, const std::string& repo)
     {
-        const auto result = GetJson(cpr::Url { "https://api.github.com/repos/" + owner + "/" + repo + "/releases" });
+        const auto result = GetJson(cpr::Url { API_BASE_URL + "/repos/" + owner + "/" + repo + "/releases" });
 
         if (!result.has_value())
         {
@@ -29,7 +31,7 @@ namespace Actinium
         {
             if (!release.is_object())
             {
-                return {};
+                continue;
             }
 
             const auto id = nlohmann::try_get<int>(release, "id");
@@ -37,14 +39,14 @@ namespace Actinium
 
             if (!id.has_value() || !tag_name.has_value() || !release.contains("assets"))
             {
-                return {};
+                continue;
             }
 
-            const auto assets = release["assets"];
+            const auto& assets = release["assets"];
 
             if (!assets.is_array())
             {
-                return {};
+                continue;
             }
 
             Release release_obj;
@@ -55,7 +57,7 @@ namespace Actinium
             {
                 if (!asset.is_object())
                 {
-                    return {};
+                    continue;
                 }
 
                 const auto asset_id = nlohmann::try_get<int>(asset, "id");
@@ -66,7 +68,7 @@ namespace Actinium
                 if (!asset_id.has_value() || !name.has_value() || !browser_download_url.has_value()
                     || !content_type.has_value())
                 {
-                    return {};
+                    continue;
                 }
 
                 Asset asset_obj;

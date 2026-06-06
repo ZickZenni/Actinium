@@ -10,7 +10,7 @@
 namespace Actinium
 {
     DownloadLibrariesTask::DownloadLibrariesTask(
-        Instance* instance, const std::vector<GitHub::Repo>& libraries, Worker* worker)
+        Instance* instance, const std::vector<LoaderLibrary>& libraries, Worker* worker)
         : DownloadTask(worker)
         , m_instance(instance)
         , m_libraries(libraries)
@@ -19,20 +19,20 @@ namespace Actinium
 
     void DownloadLibrariesTask::Run()
     {
-        for (const auto& [owner, name] : m_libraries)
+        for (auto& library : m_libraries)
         {
             emit m_worker->TaskProgressChanged(0, 100);
 
-            const auto releases = GitHub::GetReleases(owner, name);
-            const auto& release = releases.front();
+            const auto& [owner, name] = library.GetRepositoryLocation();
+            const auto& versions = library.GetVersions();
 
-            if (release.assets.empty())
+            if (versions.empty())
             {
-                emit m_worker->Error("No suitable library asset found");
+                emit m_worker->Error("No versions were found");
                 return;
             }
 
-            const auto& asset = release.assets.front();
+            const auto& latest_version = versions.front();
 
             const TempFile temp_file(Path::CreateTempFilePath());
             std::ofstream out(temp_file.GetPath(), std::ios::binary);
@@ -43,7 +43,7 @@ namespace Actinium
                 return;
             }
 
-            const auto response = Download(asset.browser_download_url, out);
+            const auto response = Download(latest_version.download_url, out);
 
             out.close();
 
@@ -60,7 +60,8 @@ namespace Actinium
 
             emit m_worker->TaskProgressChanged(100, 100);
 
-            const auto extract_path = Application::GetAppDataPath() / "libraries" / owner / name / release.tag_name;
+            const auto extract_path
+                = Application::GetAppDataPath() / "libraries" / owner / name / latest_version.version.to_string();
             const auto [code, message] = ArchiveUtils::ExtractArchive(temp_file.GetPath(), extract_path);
 
             if (code != ARCHIVE_OK)

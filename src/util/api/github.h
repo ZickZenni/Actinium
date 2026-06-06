@@ -11,7 +11,7 @@ namespace Actinium
     class GitHub
     {
     public:
-        struct Repo
+        struct RepoLocation
         {
             std::string owner;
             std::string name;
@@ -20,7 +20,6 @@ namespace Actinium
         struct Asset
         {
             int id;
-            std::string url;
             std::string name;
             std::string browser_download_url;
             std::string content_type;

@@ -1,6 +1,7 @@
 #include "download_loader_task.h"
 
 #include "core/application.h"
+#include "loader/migoto.h"
 #include "util/api/github.h"
 #include "util/fs/path.h"
 #include "util/fs/temp_file.h"
@@ -11,28 +12,23 @@
 
 namespace Actinium
 {
-    DownloadLoaderTask::DownloadLoaderTask(const std::filesystem::path& path, Worker* worker)
+    DownloadLoaderTask::DownloadLoaderTask(Instance* instance, Worker* worker)
         : DownloadTask(worker)
-        , m_path(path)
+        , m_instance(instance)
     {
     }
 
     void DownloadLoaderTask::Run()
     {
-        static std::vector<GitHub::Release> s_cached_releases;
+        const auto& releases = MigotoLoader::GetReleases();
 
-        if (s_cached_releases.empty())
-        {
-            s_cached_releases = GitHub::GetReleases("SpectrumQT", "XXMI-Libs-Package");
-        }
-
-        if (s_cached_releases.empty())
+        if (releases.empty())
         {
             emit m_worker->Error("Failed to get releases");
             return;
         }
 
-        const auto& release = s_cached_releases.front();
+        const auto& release = releases.front();
         const auto& asset = std::ranges::find_if(release.assets, IsLoaderAsset);
 
         if (asset == release.assets.end())
@@ -70,7 +66,9 @@ namespace Actinium
         emit m_worker->TaskProgressChanged(100, 100);
         SPDLOG_INFO("Downloaded loader version \"{}\"", release.tag_name);
 
-        const auto extract_path = Application::GetAppDataPath() / "loader" / "3dmigoto" / release.tag_name;
+        const auto game_directory_name = Path::SanitizeName(m_instance->GetGame()->GetName());
+        const auto extract_path
+            = Application::GetAppDataPath() / "loaders" / game_directory_name / "3dmigoto" / release.tag_name;
         const auto [code, message] = ArchiveUtils::ExtractArchive(temp_file.GetPath(), extract_path);
 
         if (code != ARCHIVE_OK)

@@ -32,7 +32,7 @@ namespace Actinium
         PrepareUI();
 
         std::vector<Task*> tasks;
-        tasks.push_back(new DownloadLoaderTask(instance->GetAbsolutePath(), m_worker));
+        tasks.push_back(new DownloadLoaderTask(instance, m_worker));
         tasks.push_back(new DownloadLibrariesTask(instance, instance->GetGame()->GetLibraries(), m_worker));
 
         m_worker->SetTasks(tasks);
@@ -52,6 +52,7 @@ namespace Actinium
         connect(m_worker, &Worker::Finished, this,
             [this]
             {
+                GApp->LaunchGameWithLoader(m_instance);
                 accept();
             });
         connect(m_worker, &Worker::Error, this,

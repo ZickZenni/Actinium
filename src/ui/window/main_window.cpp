@@ -8,6 +8,7 @@
 
 #include <QCloseEvent>
 #include <QDesktopServices>
+#include <QFileDialog>
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QPushButton>

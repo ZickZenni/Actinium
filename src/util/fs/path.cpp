@@ -84,4 +84,26 @@ namespace Actinium::Path
 
         return temp_file_path;
     }
+
+    std::filesystem::path CreateNonCollidingPath(const std::filesystem::path& desired_path)
+    {
+        if (!std::filesystem::exists(desired_path))
+        {
+            return desired_path;
+        }
+
+        const auto parent = desired_path.parent_path();
+        const auto stem = desired_path.stem().string();
+        const auto extension = desired_path.extension().string();
+
+        for (auto index = 1;; ++index)
+        {
+            auto candidate = parent / std::format("{} ({}){}", stem, index, extension);
+
+            if (!std::filesystem::exists(candidate))
+            {
+                return candidate;
+            }
+        }
+    }
 }

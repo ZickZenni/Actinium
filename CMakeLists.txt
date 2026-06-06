@@ -66,12 +66,15 @@ find_package(LibArchive REQUIRED)
 add_subdirectory(thirdparty/json)
 add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/cpr)
+add_subdirectory(thirdparty/semver)
 
 ### Generate Build Config / Info file ###
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
 
 ### Executable ###
-add_executable(Actinium)
+add_executable(Actinium
+        src/util/software/steam.cpp
+        src/util/software/steam.h)
 
 ### Source ###
 target_sources(Actinium PRIVATE
@@ -116,6 +119,14 @@ target_sources(Actinium PRIVATE
         src/task/download_task.h
         src/task/download_libraries_task.cpp
         src/task/download_libraries_task.h
+        src/loader/migoto.cpp
+        src/loader/migoto.h
+        src/util/fs/symlink.cpp
+        src/util/fs/symlink.h
+        src/util/std/string.cpp
+        src/util/std/string.h
+        src/loader/loader_library.cpp
+        src/loader/loader_library.h
 )
 
 if (WIN32)
@@ -137,6 +148,7 @@ target_link_libraries(Actinium
         spdlog::spdlog
         cpr::cpr
         LibArchive::LibArchive
+        semver
 )
 
 ### Inclusions ###

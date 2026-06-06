@@ -7,3 +7,6 @@
 [submodule "thirdparty/cpr"]
 	path = thirdparty/cpr
 	url = https://github.com/libcpr/cpr.git
+[submodule "thirdparty/semver"]
+	path = thirdparty/semver
+	url = https://github.com/Neargye/semver
