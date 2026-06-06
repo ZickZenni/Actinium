@@ -265,7 +265,7 @@ namespace Actinium
     uint64_t MigotoLoader::StartGameUsingSteam(const Instance* instance)
     {
 #ifdef WIN32
-        const auto& steam_path = Steam::DetectSteamInstallation();
+        const auto& steam_path = Application::GetSteamExecutablePath();
 
         if (!steam_path.has_value())
         {

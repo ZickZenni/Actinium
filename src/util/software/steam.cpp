@@ -17,11 +17,14 @@ namespace Actinium::Steam
             REGSAM view;
         };
 
-        static const std::array registry_candidates { RegistryCandidate {
-                                                         HKEY_CURRENT_USER, L"Software\\Valve\\Steam", L"SteamExe", 0 },
-            RegistryCandidate { HKEY_CURRENT_USER, L"Software\\Valve\\Steam", L"SteamPath", 0 },
-            RegistryCandidate { HKEY_LOCAL_MACHINE, L"SOFTWARE\\Valve\\Steam", L"InstallPath", KEY_WOW64_32KEY },
-            RegistryCandidate { HKEY_LOCAL_MACHINE, L"SOFTWARE\\Valve\\Steam", L"InstallPath", KEY_WOW64_64KEY } };
+        // clang-format off
+        static const std::array registry_candidates {
+            RegistryCandidate {HKEY_CURRENT_USER, L"Software\\Valve\\Steam", L"SteamExe", 0},
+            RegistryCandidate {HKEY_CURRENT_USER, L"Software\\Valve\\Steam", L"SteamPath", 0},
+            RegistryCandidate {HKEY_LOCAL_MACHINE, L"SOFTWARE\\Valve\\Steam", L"InstallPath", KEY_WOW64_32KEY},
+            RegistryCandidate {HKEY_LOCAL_MACHINE, L"SOFTWARE\\Valve\\Steam", L"InstallPath", KEY_WOW64_64KEY}
+        };
+        // clang-format on
 
         for (const auto& candidate : registry_candidates)
         {
@@ -52,8 +55,8 @@ namespace Actinium::Steam
             }
         }
 
-        constexpr std::array fallback_paths { L"C:\\Program Files (x86)\\Steam\\steam.exe",
-            L"C:\\Program Files\\Steam\\steam.exe" };
+        constexpr std::array fallback_paths {
+            L"C:\\Program Files (x86)\\Steam\\steam.exe", L"C:\\Program Files\\Steam\\steam.exe"};
 
         for (const auto* fallback : fallback_paths)
         {

@@ -26,7 +26,7 @@ namespace Actinium
         /**
          * Runs the application.
          */
-        [[nodiscard]] int Run();
+        int Run();
 
         /**
          * Creates a new instance for a game.
@@ -45,6 +45,10 @@ namespace Actinium
          */
         int LaunchGameWithLoader(Instance *instance, QWidget *parent = nullptr);
 
+        /**
+         * Retrieves the path to the game's executable file.
+         * Has no value if the user does not select the executable or something went wrong.
+         */
         std::optional<std::filesystem::path> GetGameExecutable(const std::string &game_id);
 
         /**
@@ -62,13 +66,17 @@ namespace Actinium
          */
         static Game *GetGameById(const std::string &id);
 
+        /**
+         * Retrieves the path of the steam executable, if installed.
+         */
+        static std::optional<std::filesystem::path> GetSteamExecutablePath();
+
     private:
         static std::vector<Game> GAMES;
 
         Config m_config;
         QCommandLineParser m_parser;
         std::vector<Instance *> m_instances;
-
         MainWindow *m_main_window;
 
         void LoadConfig();
@@ -95,6 +103,9 @@ namespace Actinium
          */
         static void GetInitialWindowSize(int &out_width, int &out_height);
 
+        /**
+         * Logs environmental information to the console / logger (spdlog) for debugging purposes.
+         */
         static void LogEnvironmentInfo();
 
         friend class MainWindow;

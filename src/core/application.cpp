@@ -278,7 +278,7 @@ namespace Actinium
 
         if (game->steam_app_id.has_value())
         {
-            const auto& steam_installation = Steam::DetectSteamInstallation();
+            const auto& steam_installation = GetSteamExecutablePath();
 
             if (steam_installation.has_value())
             {
@@ -330,6 +330,16 @@ namespace Actinium
             });
 
         return result != GAMES.end() ? std::to_address(result) : nullptr;
+    }
+
+    std::optional<std::filesystem::path> Application::GetSteamExecutablePath()
+    {
+        /**
+         * Try to only run this a single time.
+         */
+        static const auto& path = Steam::DetectSteamInstallation();
+
+        return path;
     }
 
     void Application::LoadConfig()
@@ -428,6 +438,8 @@ namespace Actinium
 
         std::filesystem::create_directories(appdata_path);
         std::filesystem::create_directories(appdata_path / "instances");
+        std::filesystem::create_directories(appdata_path / "loaders");
+        std::filesystem::create_directories(appdata_path / "libraries");
     }
 
     void Application::GetInitialWindowSize(int& out_width, int& out_height)
