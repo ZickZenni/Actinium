@@ -79,8 +79,14 @@ namespace Actinium
         std::vector<Instance *> m_instances;
         MainWindow *m_main_window;
 
+        /**
+         * Loads the configuration settings for the application.
+         */
         void LoadConfig();
 
+        /**
+         * Saves the current configuration settings.
+         */
         void SaveConfig();
 
         /**
