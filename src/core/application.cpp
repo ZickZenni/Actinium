@@ -21,16 +21,54 @@
 
 namespace Actinium
 {
-    std::vector<Game> Application::GAMES
-        = { Game("genshin_impact", "Genshin Impact", "GenshinImpact.exe",
-                { LoaderLibrary { { .owner = "SilentNightSound", .name = "GIMI-Package" } } }),
-              Game("honkai_star_rail", "Honkai Star Rail", "StarRail.exe",
-                  { LoaderLibrary { { .owner = "SpectrumQT", .name = "SRMI-Package" } } }),
-              Game("zenless_zone_zero", "Zenless Zone Zero", "ZenlessZoneZero.exe",
-                  { LoaderLibrary { { .owner = "leotorrez", .name = "ZZMI-Package" } } }),
-              Game("wuthering_waves", "Wuthering Waves", "Client-Win64-Shipping.exe",
-                  { LoaderLibrary { { .owner = "SpectrumQT", .name = "WWMI-Package" } } }, 3513350,
-                  std::vector<std::string> { "-DisableModule=streamline", "-dx11", "-d3d11" }) };
+    // clang-format off
+    std::vector<Game> Application::GAMES = {
+        {
+            .id = "genshin_impact",
+            .name = "Genshin Impact",
+            .executable_name = "GenshinImpact.exe",
+            .libraries = {
+                LoaderLibrary { "SilentNightSound", "GIMI-Package" },
+            },
+            .steam_app_id = std::nullopt,
+            .steam_start_parameters = {}
+        },
+        {
+            .id = "honkai_star_rail",
+            .name = "Honkai Star Rail",
+            .executable_name = "StarRail.exe",
+            .libraries = {
+                LoaderLibrary { "SpectrumQT", "SRMI-Package" },
+            },
+            .steam_app_id = std::nullopt,
+            .steam_start_parameters = {}
+        },
+        {
+            .id = "zenless_zone_zero",
+            .name = "Zenless Zone Zero",
+            .executable_name = "ZenlessZoneZero.exe",
+            .libraries = {
+                LoaderLibrary { "leotorrez", "ZZMI-Package" },
+            },
+            .steam_app_id = std::nullopt,
+            .steam_start_parameters = {}
+        },
+        {
+            .id = "wuthering_waves",
+            .name = "Wuthering Waves",
+            .executable_name = "Client-Win64-Shipping.exe",
+            .libraries = {
+                LoaderLibrary { "SpectrumQT", "WWMI-Package" },
+            },
+            .steam_app_id = 3513350,
+            .steam_start_parameters = {
+                "-DisableModule=streamline",
+                "-dx11",
+                "-d3d11",
+            },
+        }
+    };
+    // clang-format on
 
     Application::Application(int argc, char* argv[])
         : QApplication(argc, argv)
@@ -50,9 +88,9 @@ namespace Actinium
         LoadConfig();
 
         QList<QCommandLineOption> options;
-        options.push_back({ { "l", "launch" }, "Launch a instance", "instance" });
-        options.push_back({ "skip-launch-check",
-            "Skips the launch check for the loader and libraries, and straight goes to injecting" });
+        options.push_back({{"l", "launch"}, "Launch a instance", "instance"});
+        options.push_back({"skip-launch-check",
+            "Skips the launch check for the loader and libraries, and straight goes to injecting"});
 
         m_parser.addOptions(options);
         m_parser.addHelpOption();
@@ -150,7 +188,7 @@ namespace Actinium
 
         SPDLOG_INFO("Launching instance \"{}\"", instance->name);
 
-        if (!GetGameExecutable(instance->GetGame()->GetId().data()).has_value())
+        if (!GetGameExecutable(instance->GetGame()->id).has_value())
         {
             return 1;
         }
@@ -162,7 +200,7 @@ namespace Actinium
     int Application::LaunchGameWithLoader(Instance* instance, QWidget* parent)
     {
 #ifdef WIN32
-        if (!GetGameExecutable(instance->GetGame()->GetId().data()).has_value())
+        if (!GetGameExecutable(instance->GetGame()->id).has_value())
         {
             return 1;
         }
@@ -238,7 +276,7 @@ namespace Actinium
             return std::nullopt;
         }
 
-        if (game->GetSteamAppId().has_value())
+        if (game->steam_app_id.has_value())
         {
             const auto& steam_installation = Steam::DetectSteamInstallation();
 
@@ -252,7 +290,7 @@ namespace Actinium
         {
             QFileDialog file_dialog(m_main_window);
             file_dialog.setFileMode(QFileDialog::ExistingFile);
-            file_dialog.setNameFilter(tr("Game Executable (" + game->GetExecutableName() + ")"));
+            file_dialog.setNameFilter(tr(std::string("Game Executable (" + game->executable_name + ")").c_str()));
 
             if (file_dialog.exec())
             {
@@ -261,7 +299,7 @@ namespace Actinium
 
                 SPDLOG_INFO("Selected file: {}", selected_file.toStdString());
 
-                m_config.game_executables.insert({ game_id, selected_file.toStdString() });
+                m_config.game_executables.insert({game_id, selected_file.toStdString()});
                 SaveConfig();
             }
             else
@@ -286,9 +324,9 @@ namespace Actinium
     Game* Application::GetGameById(const std::string& id)
     {
         const auto result = std::ranges::find_if(GAMES,
-            [&id](const auto& v)
+            [&id](const Game& v)
             {
-                return v.GetId() == id;
+                return v.id == id;
             });
 
         return result != GAMES.end() ? std::to_address(result) : nullptr;
@@ -316,15 +354,15 @@ namespace Actinium
 
             for (const auto& game : GAMES)
             {
-                const auto& game_executable_path = nlohmann::try_get<std::string>(game_executables, game.GetId());
+                const auto& game_executable_path = nlohmann::try_get<std::string>(game_executables, game.id);
 
                 if (!game_executable_path.has_value())
                 {
                     continue;
                 }
 
-                m_config.game_executables.insert({ game.GetId(), game_executable_path.value() });
-                SPDLOG_INFO("Found game executable \"{}\" for game \"{}\"", game_executable_path.value(), game.GetId());
+                m_config.game_executables.insert({game.id, game_executable_path.value()});
+                SPDLOG_INFO("Found game executable \"{}\" for game \"{}\"", game_executable_path.value(), game.id);
             }
         }
     }
@@ -332,7 +370,7 @@ namespace Actinium
     void Application::SaveConfig()
     {
         const auto& config_path = GetAppDataPath() / "config.json";
-        const auto& json = nlohmann::json { { "game_executables", m_config.game_executables } };
+        const auto& json = nlohmann::json {{"game_executables", m_config.game_executables}};
 
         std::ofstream(config_path) << json.dump(4);
     }

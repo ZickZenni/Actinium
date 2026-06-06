@@ -33,7 +33,7 @@ namespace Actinium
 
         std::vector<Task*> tasks;
         tasks.push_back(new DownloadLoaderTask(instance, m_worker));
-        tasks.push_back(new DownloadLibrariesTask(instance, instance->GetGame()->GetLibraries(), m_worker));
+        tasks.push_back(new DownloadLibrariesTask(instance, instance->GetGame()->libraries, m_worker));
 
         m_worker->SetTasks(tasks);
         m_worker->moveToThread(m_worker_thread);

@@ -48,8 +48,8 @@ namespace Actinium
 
             for (const auto& game : Application::GetSupportedGames())
             {
-                const auto name = QString::fromStdString(std::string(game.GetName()));
-                const auto id = QString::fromStdString(std::string(game.GetId()));
+                const auto name = QString::fromStdString(std::string(game.name));
+                const auto id = QString::fromStdString(std::string(game.id));
 
                 m_game_combo->addItem(name, id);
             }

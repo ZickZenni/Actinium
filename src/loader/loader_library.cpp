@@ -12,6 +12,11 @@ namespace Actinium
     {
     }
 
+    LoaderLibrary::LoaderLibrary(const std::string& repository_owner, const std::string& repository_name)
+        : LoaderLibrary({ repository_owner, repository_name })
+    {
+    }
+
     const GitHub::RepoLocation& LoaderLibrary::GetRepositoryLocation() const
     {
         return m_repository_location;

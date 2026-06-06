@@ -66,7 +66,7 @@ namespace Actinium
         emit m_worker->TaskProgressChanged(100, 100);
         SPDLOG_INFO("Downloaded loader version \"{}\"", release.tag_name);
 
-        const auto game_directory_name = Path::SanitizeName(m_instance->GetGame()->GetName());
+        const auto game_directory_name = Path::SanitizeName(m_instance->GetGame()->name);
         const auto extract_path
             = Application::GetAppDataPath() / "loaders" / game_directory_name / "3dmigoto" / release.tag_name;
         const auto [code, message] = ArchiveUtils::ExtractArchive(temp_file.GetPath(), extract_path);

@@ -30,7 +30,7 @@ namespace Actinium
 
         std::filesystem::create_directories(location / "mods");
 
-        const nlohmann::json json { { "name", name }, { "game", m_game->GetId() } };
+        const nlohmann::json json { { "name", name }, { "game", m_game->id } };
 
         std::ofstream(instance_file) << json.dump(4);
     }

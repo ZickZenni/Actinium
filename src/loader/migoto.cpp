@@ -53,7 +53,7 @@ namespace Actinium
     uint64_t MigotoLoader::StartGame(const Instance* instance)
     {
 #ifdef WIN32
-        if (!instance->GetGame()->GetSteamAppId().has_value())
+        if (!instance->GetGame()->steam_app_id.has_value())
         {
             return StartGameNative(instance);
         }
@@ -76,7 +76,7 @@ namespace Actinium
         }
 
         const auto& latest_version = loader_versions.front().tag_name;
-        const auto& game_directory_name = Path::SanitizeName(instance->GetGame()->GetName());
+        const auto& game_directory_name = Path::SanitizeName(instance->GetGame()->name);
         const auto& loader_path
             = Application::GetAppDataPath() / "loaders" / game_directory_name / "3dmigoto" / latest_version;
 
@@ -106,7 +106,7 @@ namespace Actinium
 
         SPDLOG_INFO("Using loader version: {}", latest_version);
 
-        const auto game_directory_name = Path::SanitizeName(instance->GetGame()->GetName());
+        const auto game_directory_name = Path::SanitizeName(instance->GetGame()->name);
         const auto module_path = Application::GetAppDataPath() / "loaders" / game_directory_name / "3dmigoto"
             / latest_version / "d3d11.dll";
 
@@ -225,7 +225,7 @@ namespace Actinium
     uint64_t MigotoLoader::StartGameNative(const Instance* instance)
     {
 #ifdef WIN32
-        const auto& game_executable_path = GApp->GetGameExecutable(instance->GetGame()->GetId().data());
+        const auto& game_executable_path = GApp->GetGameExecutable(instance->GetGame()->id);
 
         if (!game_executable_path.has_value())
         {
@@ -274,25 +274,18 @@ namespace Actinium
 
         const auto& game = instance->GetGame();
 
-        if (!game->GetSteamAppId().has_value())
+        if (!game->steam_app_id.has_value())
         {
             return 0;
         }
 
         std::vector<std::string> start_parameters;
         start_parameters.push_back("-applaunch");
-        start_parameters.push_back(std::to_string(game->GetSteamAppId().value()));
+        start_parameters.push_back(std::to_string(game->steam_app_id.value()));
 
-        const auto& game_steam_start_parameters = game->GetSteamStartParameters();
-
-        if (game_steam_start_parameters.has_value())
+        for (const auto& parameter : game->steam_start_parameters)
         {
-            const auto& value = game_steam_start_parameters.value();
-
-            for (const auto& parameter : value)
-            {
-                start_parameters.push_back(parameter);
-            }
+            start_parameters.push_back(parameter);
         }
 
         const auto& parameters = Windows::BuildParameters(start_parameters);
@@ -313,22 +306,21 @@ namespace Actinium
             return 0;
         }
 
-        const auto& executable_name = game->GetExecutableName().data();
         auto tries = 0;
 
         do
         {
             tries++;
             std::this_thread::sleep_for(std::chrono::seconds(1));
-        } while (!Windows::IsProcessRunning(executable_name) && tries < 15);
+        } while (!Windows::IsProcessRunning(game->executable_name) && tries < 15);
 
         if (tries >= 15)
         {
-            SPDLOG_ERROR("Failed to find game process \"{}\" after 15 seconds", executable_name);
+            SPDLOG_ERROR("Failed to find game process \"{}\" after 15 seconds", game->executable_name);
             return 0;
         }
 
-        return Windows::GetProcessId(executable_name);
+        return Windows::GetProcessId(game->executable_name);
 #else
         return 0;
 #endif
@@ -357,9 +349,8 @@ namespace Actinium
     bool MigotoLoader::PrepareLibraries(const Instance* instance, const std::filesystem::path& loader_path)
     {
         const auto& loader_shader_fixes_path = loader_path / "ShaderFixes";
-        auto libraries = instance->GetGame()->GetLibraries();
 
-        for (auto& library : libraries)
+        for (auto& library : instance->GetGame()->libraries)
         {
             const auto& repo_location = library.GetRepositoryLocation();
             const auto& versions = library.GetVersions();

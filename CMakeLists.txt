@@ -72,9 +72,7 @@ add_subdirectory(thirdparty/semver)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
 
 ### Executable ###
-add_executable(Actinium
-        src/util/software/steam.cpp
-        src/util/software/steam.h)
+add_executable(Actinium)
 
 ### Source ###
 target_sources(Actinium PRIVATE
@@ -127,6 +125,8 @@ target_sources(Actinium PRIVATE
         src/util/std/string.h
         src/loader/loader_library.cpp
         src/loader/loader_library.h
+        src/util/software/steam.cpp
+        src/util/software/steam.h
 )
 
 if (WIN32)
