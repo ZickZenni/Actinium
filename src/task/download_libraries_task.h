@@ -16,6 +16,9 @@ namespace Actinium
         Instance* m_instance;
         std::vector<LoaderLibrary> m_libraries;
 
+        /**
+         * Copies the configuration file to the instance if it does not already have one.
+         */
         static void CopyMissingConfigurationFile(const Instance * instance, const std::filesystem::path &source);
     };
 }

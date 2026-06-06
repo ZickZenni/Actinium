@@ -40,6 +40,16 @@ namespace Actinium
         return GetAbsolutePath(m_directory_name);
     }
 
+    const std::string& Instance::GetDirectoryName() const
+    {
+        return m_directory_name;
+    }
+
+    Game* Instance::GetGame() const
+    {
+        return m_game;
+    }
+
     Instance* Instance::Load(const std::string& directory_name)
     {
         const auto location = GetAbsolutePath(directory_name);

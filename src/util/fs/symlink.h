@@ -2,6 +2,10 @@
 
 #include <filesystem>
 
+/**
+ * This utility namespace exists because std::filesystem's symlink functions do not work / are not implemented in Windows.
+ * Which makes sense cause only Unix systems have symlinks but Windows kinda also does, so fuck off.
+ */
 namespace Actinium::Symlink
 {
     /**

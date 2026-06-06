@@ -17,6 +17,9 @@ namespace Actinium
     private:
         Instance* m_instance;
 
+        /**
+         * Checks if the specified GitHub asset is usable as a loader asset.
+         */
         static bool IsLoaderAsset(const GitHub::Asset& asset);
     };
 }

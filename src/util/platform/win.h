@@ -33,6 +33,9 @@ namespace Actinium::Windows
      */
     bool IsProcessRunning(const std::string &process_name);
 
+    /**
+     * Retrieves the id of a process by it's name.
+     */
     uint64_t GetProcessId(const std::string &process_name);
 
     /**
@@ -40,6 +43,9 @@ namespace Actinium::Windows
      */
     std::wstring FromString(const std::string &str);
 
+    /**
+     * Reads a string value from the Windows Registry.
+     */
     std::optional<std::wstring> ReadRegistryString(
         HKEY root, const std::wstring &sub_key, const std::wstring &value, REGSAM view = 0);
 }

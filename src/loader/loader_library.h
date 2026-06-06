@@ -19,8 +19,14 @@ namespace Actinium
         explicit LoaderLibrary(GitHub::RepoLocation repository_location);
         explicit LoaderLibrary(const std::string &repository_owner, const std::string &repository_name);
 
+        /**
+         * Retrieves the location pointing to the GitHub repository where the library is stored.
+         */
         const GitHub::RepoLocation &GetRepositoryLocation() const;
 
+        /**
+         * Retrieves all versions available.
+         */
         const std::vector<Version> &GetVersions();
 
     private:

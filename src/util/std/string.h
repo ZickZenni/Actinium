@@ -1,9 +1,12 @@
 #pragma once
 
+#include <span>
 #include <string>
-#include <vector>
 
 namespace Actinium::String
 {
-    std::string Join(const std::vector<std::string> &vec, const std::string &separator);
+    /**
+     * Joins a collection of strings into a single string, separated by the specified separator.
+     */
+    std::string Join(const std::span<const std::string> &values, const std::string_view &separator);
 }

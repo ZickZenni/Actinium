@@ -32,9 +32,15 @@ namespace Actinium
             std::vector<Asset> assets;
         };
 
+        /**
+         * Retrieves releases from the specified repository by the GitHub API.
+         */
         static std::vector<Release> GetReleases(const std::string &owner, const std::string &repo);
 
     private:
+        /**
+         * Fetches from the GitHub API and gives back the JSON response.
+         */
         static std::expected<nlohmann::json, std::string> GetJson(const cpr::Url &url);
     };
 }

@@ -14,6 +14,9 @@ namespace Actinium
 
         virtual ~Task() = default;
 
+        /**
+         * Runs the task, what else?
+         */
         virtual void Run() = 0;
 
     protected:

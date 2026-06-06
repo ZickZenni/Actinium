@@ -22,23 +22,17 @@ namespace Actinium
         /**
          * Retrieves the absolute path of the folder, where all data is stored in.
          */
-        std::filesystem::path GetAbsolutePath() const;
+        [[nodiscard]] std::filesystem::path GetAbsolutePath() const;
 
         /**
          * Retrieves the directory name where all data is stored in.
          */
-        [[nodiscard]] const std::string &GetDirectoryName() const
-        {
-            return m_directory_name;
-        }
+        [[nodiscard]] const std::string &GetDirectoryName() const;
 
         /**
          * Retrieves the game that the instance is for.
          */
-        [[nodiscard]] Game *GetGame() const
-        {
-            return m_game;
-        }
+        [[nodiscard]] Game *GetGame() const;
 
         /**
          * Loads an instance into memory by reading the data saved on the disk.
