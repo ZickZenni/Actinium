@@ -279,6 +279,11 @@ namespace Actinium
             return 0;
         }
 
+        if (Windows::IsProcessRunning(game->executable_name))
+        {
+            return UINT64_MAX;
+        }
+
         std::vector<std::string> start_parameters;
         start_parameters.push_back("-applaunch");
         start_parameters.push_back(std::to_string(game->steam_app_id.value()));
