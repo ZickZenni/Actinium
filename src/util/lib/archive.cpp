@@ -1,5 +1,7 @@
 #include "archive.h"
 
+#include "core/logger.h"
+
 #include <archive_entry.h>
 #include <spdlog/spdlog.h>
 
@@ -10,7 +12,7 @@ namespace Actinium
     {
         if (!std::filesystem::exists(file_path) || !std::filesystem::is_regular_file(file_path))
         {
-            return { .code = ARCHIVE_FATAL, .message = "File does not exist or is not a regular file" };
+            return {.code = ARCHIVE_FATAL, .message = "File does not exist or is not a regular file"};
         }
 
         archive* read_archive = archive_read_new();
@@ -32,10 +34,11 @@ namespace Actinium
             archive_write_close(write_archive);
             archive_write_free(write_archive);
 
-            return { .code = result, .message = message };
+            return {.code = result, .message = message};
         }
 
-        SPDLOG_DEBUG("Extracting files from archive \"{}\" to \"{}\"", file_path.string(), extract_path.string());
+        Logger::Debug("util", "extract_archive_started", "Extracting files from archive \"{}\" to \"{}\"",
+            file_path.string(), extract_path.string());
 
         archive_entry* entry;
         int entries_found = 0;
@@ -44,7 +47,7 @@ namespace Actinium
         while (archive_read_next_header(read_archive, &entry) == ARCHIVE_OK)
         {
             const auto entry_file_name = std::string(archive_entry_pathname(entry));
-            SPDLOG_DEBUG("Found file inside archive \"{}\"", entry_file_name);
+            Logger::Debug("util", "extract_archive_entry_found", "Found entry inside archive \"{}\"", entry_file_name);
 
             archive_entry_set_pathname(entry, (extract_path / entry_file_name).string().c_str());
 
@@ -54,24 +57,26 @@ namespace Actinium
 
                 if (archive_write_finish_entry(write_archive) != ARCHIVE_OK)
                 {
-                    SPDLOG_ERROR("archive_write_finish_entry() error: {}", archive_error_string(write_archive));
+                    Logger::Error("util", "extract_file_failed", "archive_write_finish_entry() error: {}",
+                        archive_error_string(write_archive));
                 }
                 else
                 {
-                    SPDLOG_DEBUG("Success extracting file \"{}\"", entry_file_name);
+                    Logger::Debug("util", "extract_file_success", "Success extracting file \"{}\"", entry_file_name);
                     success_extractions++;
                 }
             }
             else
             {
-                SPDLOG_WARN("archive_write_header() error: {}", archive_error_string(write_archive));
+                Logger::Error("util", "extract_file_failed", "archive_write_header() error: {}",
+                    archive_error_string(write_archive));
             }
 
             entries_found++;
         }
 
-        SPDLOG_DEBUG("Finished extracting files {}/{} from archive \"{}\"", success_extractions, entries_found,
-            file_path.string());
+        Logger::Debug("util", "extract_archive_success", "Finished extracting files {}/{} from archive \"{}\"",
+            success_extractions, entries_found, file_path.string());
 
         archive_read_close(read_archive);
         archive_read_free(read_archive);
@@ -79,7 +84,7 @@ namespace Actinium
         archive_write_close(write_archive);
         archive_write_free(write_archive);
 
-        return { .code = result, .message = "" };
+        return {.code = result, .message = ""};
     }
 
     int ArchiveUtils::CopyData(archive* read_archive, archive* write_archive)

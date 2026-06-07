@@ -1,5 +1,7 @@
 #include "symlink.h"
 
+#include "core/logger.h"
+
 #include <spdlog/spdlog.h>
 #include <windows.h>
 
@@ -15,7 +17,7 @@ namespace Actinium::Symlink
         if (!result)
         {
             const auto error = GetLastError();
-            SPDLOG_ERROR("CreateSymbolicLinkW failed with error code {}", error);
+            Logger::Error("util", "create_symlink_failed", "CreateSymbolicLinkW failed with error code {}", error);
         }
 
         return result;
@@ -25,7 +27,8 @@ namespace Actinium::Symlink
 
         if (error_code)
         {
-            SPDLOG_ERROR("std::filesystem::create_symlink failed with error code {}", error_code.value());
+            Logger::Error("util", "create_symlink_failed", "std::filesystem::create_symlink failed with error code {}",
+                error_code.value());
         }
 
         return !error_code;
@@ -40,7 +43,7 @@ namespace Actinium::Symlink
         if (result == INVALID_FILE_ATTRIBUTES)
         {
             const auto error = GetLastError();
-            SPDLOG_ERROR("GetFileAttributesW failed with error code {}", error);
+            Logger::Error("util", "is_symlink_failed", "GetFileAttributesW failed with error code {}", error);
         }
 
         return result;
@@ -51,7 +54,8 @@ namespace Actinium::Symlink
 
         if (error_code)
         {
-            SPDLOG_ERROR("std::filesystem::is_symlink failed with error code {}", error_code.value());
+            Logger::Error("util", "is_symlink_failed", "std::filesystem::is_symlink failed with error code {}",
+                error_code.value());
         }
 
         return result;

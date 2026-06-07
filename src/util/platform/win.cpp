@@ -1,5 +1,7 @@
 #include "win.h"
 
+#include "core/logger.h"
+
 #include <cstdint>
 #include <string>
 #include <tchar.h>
@@ -76,6 +78,8 @@ namespace Actinium::Windows
 
         if (!GetModuleFileNameW(nullptr, path, MAX_PATH))
         {
+            Logger::Error(
+                "util", "execute_itself_with_elevated_privileges_failed", "Failed to get module file name of current process");
             return false;
         }
 

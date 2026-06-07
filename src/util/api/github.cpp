@@ -1,5 +1,6 @@
 #include "github.h"
 
+#include "core/logger.h"
 #include "util/lib/json.h"
 
 #include <cpr/cpr.h>
@@ -11,7 +12,7 @@ namespace Actinium
 
     std::vector<GitHub::Release> GitHub::GetReleases(const std::string& owner, const std::string& repo)
     {
-        const auto result = GetJson(cpr::Url { API_BASE_URL + "/repos/" + owner + "/" + repo + "/releases" });
+        const auto result = GetJson(cpr::Url {API_BASE_URL + "/repos/" + owner + "/" + repo + "/releases"});
 
         if (!result.has_value())
         {
@@ -92,7 +93,7 @@ namespace Actinium
 
         if (result.status_code != 200)
         {
-            SPDLOG_ERROR("Request failed with status code {}", result.status_code);
+            Logger::Error("util", "github_fetch_failed", "Request failed with status code {}", result.status_code);
 
             return std::unexpected("Status code is non 200");
         }
@@ -101,7 +102,7 @@ namespace Actinium
 
         if (body.empty())
         {
-            SPDLOG_ERROR("Body is empty");
+            Logger::Error("util", "github_response_body_empty", "Body is empty");
 
             return std::unexpected("Body is empty");
         }

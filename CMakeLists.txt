@@ -128,6 +128,7 @@ target_sources(Actinium PRIVATE
         src/loader/loader_library.h
         src/util/software/steam.cpp
         src/util/software/steam.h
+        src/core/logger.h
 )
 
 if (WIN32)

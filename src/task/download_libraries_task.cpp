@@ -1,6 +1,7 @@
 #include "download_libraries_task.h"
 
 #include "core/application.h"
+#include "core/logger.h"
 #include "util/api/github.h"
 #include "util/fs/path.h"
 #include "util/fs/temp_file.h"
@@ -44,8 +45,8 @@ namespace Actinium
 
                 CopyMissingConfigurationFile(m_instance, extract_path / "d3dx.ini");
 
-                SPDLOG_INFO("Library \"{}/{}\" version \"{}\" already downloaded", owner, name,
-                    latest_version.version.to_string());
+                Logger::Info("task", "skip_library_download", "Library \"{}/{}\" version \"{}\" already downloaded",
+                    owner, name, latest_version.version.to_string());
                 return;
             }
 
@@ -57,6 +58,9 @@ namespace Actinium
                 emit m_worker->Error("Failed to create temp file");
                 return;
             }
+
+            Logger::Info("task", "download_library_started", "Downloading library \"{}/{}\" version \"{}\"", owner,
+                name, latest_version.version.to_string());
 
             const auto response = Download(latest_version.download_url, out);
 

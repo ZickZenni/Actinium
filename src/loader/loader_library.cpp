@@ -1,6 +1,7 @@
 #include "loader_library.h"
 
 #include "core/application.h"
+#include "core/logger.h"
 #include "spdlog/spdlog.h"
 
 #include <utility>
@@ -33,8 +34,8 @@ namespace Actinium
 
             if (github_releases.empty())
             {
-                SPDLOG_ERROR("Release retrieval from GitHub failed ({}/{})", m_repository_location.owner,
-                    m_repository_location.name);
+                Logger::Error("loader", "library_get_versions_failed", "Release retrieval from GitHub failed ({}/{})",
+                    m_repository_location.owner, m_repository_location.name);
                 return m_versions;
             }
 
@@ -44,7 +45,8 @@ namespace Actinium
 
                 if (assets.empty())
                 {
-                    SPDLOG_WARN("No assets were found inside release {}", release.id);
+                    Logger::Warn(
+                        "loader", "library_release_assets_empty", "No assets were found inside release {}", release.id);
                     continue;
                 }
 
@@ -59,7 +61,8 @@ namespace Actinium
 
                 if (!semver::parse(raw_version, sem_version))
                 {
-                    SPDLOG_ERROR("Received invalid formatted version that semver cannot parse: {}", raw_version);
+                    Logger::Error("loader", "library_invalid_version_format",
+                        "Received invalid formatted version that semver cannot parse: {}", raw_version);
                     continue;
                 }
 

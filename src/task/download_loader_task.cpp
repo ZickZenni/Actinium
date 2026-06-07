@@ -1,6 +1,7 @@
 #include "download_loader_task.h"
 
 #include "core/application.h"
+#include "core/logger.h"
 #include "loader/migoto.h"
 #include "util/api/github.h"
 #include "util/fs/path.h"
@@ -45,11 +46,11 @@ namespace Actinium
         {
             emit m_worker->TaskProgressChanged(100, 100);
 
-            SPDLOG_INFO("Loader version \"{}\" already downloaded", release.tag_name);
+            Logger::Info("task", "skip_loader_download", "Loader version \"{}\" already downloaded", release.tag_name);
             return;
         }
 
-        SPDLOG_INFO("Downloading loader version \"{}\"...", release.tag_name);
+        Logger::Info("task", "loader_download_started", "Downloading loader version \"{}\"...", release.tag_name);
 
         const TempFile temp_file(Path::CreateTempFilePath());
         std::ofstream out(temp_file.GetPath(), std::ios::binary);
@@ -76,7 +77,7 @@ namespace Actinium
         }
 
         emit m_worker->TaskProgressChanged(100, 100);
-        SPDLOG_INFO("Downloaded loader version \"{}\"", release.tag_name);
+        Logger::Info("task", "download_loader_success", "Downloaded loader version \"{}\"", release.tag_name);
 
         const auto [code, message] = ArchiveUtils::ExtractArchive(temp_file.GetPath(), extract_path);
 

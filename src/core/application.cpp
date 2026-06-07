@@ -6,6 +6,7 @@
 
 #include "build_config.h"
 #include "loader/migoto.h"
+#include "logger.h"
 #include "ui/dialog/launch_instance_dialog.h"
 #include "util/lib/json.h"
 #include "util/lib/qt.h"
@@ -98,8 +99,10 @@ namespace Actinium
         setApplicationVersion(VERSION);
 
         spdlog::set_level(spdlog::level::trace);
-        spdlog::set_pattern("[%H:%M:%S.%e] [%^%-8l%$] [%s:%#] %v");
-        SPDLOG_INFO("Running {} on v{}", applicationDisplayName().toStdString(), applicationVersion().toStdString());
+        spdlog::set_pattern("timestamp=%Y-%m-%dT%H:%M:%S.%e%z level=%l %v");
+
+        Logger::Info("core", "app.startup", "Running {} on v{}", applicationDisplayName().toStdString(),
+            applicationVersion().toStdString());
 
         LoadConfig();
 
@@ -195,14 +198,14 @@ namespace Actinium
 
         m_instances.push_back(instance);
 
-        SPDLOG_INFO("Created instance: {}", name);
+        Logger::Info("core", "create_instance_success", "Created instance: {}", name);
     }
 
     int Application::LaunchInstance(Instance* instance)
     {
         Q_CHECK_PTR(instance);
 
-        SPDLOG_INFO("Launching instance \"{}\"", instance->name);
+        Logger::Info("core", "launch_instance", "Launching instance \"{}\"", instance->name);
 
         if (!GetGameExecutable(instance->GetGame()->id).has_value())
         {
@@ -265,17 +268,18 @@ namespace Actinium
             return 1;
         }
 
-        SPDLOG_INFO("Successfully launched game process with PID {}", process_id);
+        Logger::Info("core", "game_launch_success", "Successfully launched game process with PID {}", process_id);
 
         const auto result = MigotoLoader::InjectIntoProcess(instance, process_id);
 
         if (result == MigotoLoader::InjectResult::OK)
         {
-            SPDLOG_INFO("Successfully injected loader into game process.");
+            Logger::Info("core", "loader_inject_success", "Successfully injected loader into game process.");
             return 0;
         }
 
-        SPDLOG_ERROR("Failed to inject loader into game process: {}", static_cast<int>(result));
+        Logger::Error(
+            "core", "loader_inject_failed", "Failed to inject loader into game process: {}", static_cast<int>(result));
         QMessageBox::critical(parent, "Error", "Failed to inject loader into game process.", QMessageBox::Close);
         return 1;
 #else
@@ -314,7 +318,8 @@ namespace Actinium
                 const auto& selected_files = file_dialog.selectedFiles();
                 const auto& selected_file = selected_files.front();
 
-                SPDLOG_INFO("Selected file: {}", selected_file.toStdString());
+                Logger::Debug(
+                    "core", "game_executable_selected_file", "Selected file: {}", selected_file.toStdString());
 
                 m_config.game_executables.insert({game_id, selected_file.toStdString()});
                 SaveConfig();
@@ -367,7 +372,7 @@ namespace Actinium
         {
             SaveConfig();
 
-            SPDLOG_WARN("Could not load config, file does not exist");
+            Logger::Warn("core", "config_load_Failed", "Could not load config, file does not exist");
             return;
         }
 
@@ -389,7 +394,8 @@ namespace Actinium
                 }
 
                 m_config.game_executables.insert({game.id, game_executable_path.value()});
-                SPDLOG_INFO("Found game executable \"{}\" for game \"{}\"", game_executable_path.value(), game.id);
+                Logger::Info("core", "config_found_game_path", "Found game executable \"{}\" for game \"{}\"",
+                    game_executable_path.value(), game.id);
             }
         }
     }
@@ -400,12 +406,13 @@ namespace Actinium
         const auto& json = nlohmann::json {{"game_executables", m_config.game_executables}};
 
         std::ofstream(config_path) << json.dump(4);
+        Logger::Info("core", "config_save_success", "Saved config to \"{}\"", config_path.string());
     }
 
     void Application::LoadInstances()
     {
         const auto instances_path = GetAppDataPath() / "instances";
-        SPDLOG_INFO("Loading instances in \"{}\"", instances_path.string());
+        Logger::Info("core", "load_instances_started", "Loading instances in \"{}\"", instances_path.string());
 
         const auto entries = std::filesystem::directory_iterator(instances_path);
 
@@ -413,37 +420,40 @@ namespace Actinium
         {
             if (!entry.is_directory())
             {
-                SPDLOG_WARN("Skipping non-directory entry \"{}\"", entry.path().string());
+                Logger::Warn("core", "load_instances_invalid_entry_found", "Skipping non-directory entry \"{}\"",
+                    entry.path().string());
                 continue;
             }
 
             const auto name = entry.path().filename().string();
-            SPDLOG_INFO("Found instance directory \"{}\"", name);
+            Logger::Info("core", "load_instances_entry_found", "Found instance directory \"{}\"", name);
 
             const auto instance = Instance::Load(name);
 
             if (instance != nullptr)
             {
-                SPDLOG_INFO("Loaded instance \"{}\" from \"{}\"", instance->name, entry.path().string());
+                Logger::Info("core", "load_instances_load_instance_success", R"(Loaded instance "{}" from "{}")",
+                    instance->name, entry.path().string());
                 m_instances.push_back(instance);
             }
             else
             {
-                SPDLOG_ERROR("Failed to load instance \"{}\" from \"{}\"", name, entry.path().string());
+                Logger::Info("core", "load_instances_load_instance_failed", R"(Failed to load instance "{}" from "{}")",
+                    name, entry.path().string());
             }
         }
     }
 
     void Application::PrepareUI()
     {
-        SPDLOG_DEBUG("Preparing UI for application");
+        Logger::Debug("core", "prepare_ui", "Preparing UI for application");
 
         m_main_window = new MainWindow(this);
 
         int width, height;
         GetInitialWindowSize(width, height);
 
-        SPDLOG_DEBUG("Initial window size: {}x{}", width, height);
+        Logger::Debug("core", "prepare_ui", "Initial window size: {}x{}", width, height);
 
         m_main_window->resize(width, height);
     }
@@ -451,7 +461,7 @@ namespace Actinium
     void Application::CreatePaths()
     {
         const auto appdata_path = GetAppDataPath();
-        SPDLOG_INFO("Using data path \"{}\"", appdata_path.string());
+        Logger::Info("core", "create_paths", "Using data path \"{}\"", appdata_path.string());
 
         std::filesystem::create_directories(appdata_path);
         std::filesystem::create_directories(appdata_path / "instances");
@@ -470,11 +480,12 @@ namespace Actinium
 
     void Application::LogEnvironmentInfo()
     {
-        SPDLOG_INFO("Architecture: {}", qstr(QSysInfo::buildCpuArchitecture()));
-        SPDLOG_INFO("Platform: {} ({})", qstr(QSysInfo::prettyProductName()), qstr(QSysInfo::productVersion()));
-        SPDLOG_INFO("Hostname: {}", qstr(QSysInfo::machineHostName()));
-        SPDLOG_INFO("Git Commit: {} - \"{}\"", GIT_COMMIT_HASH, GIT_COMMIT_MESSAGE);
-        SPDLOG_INFO("Git Branch: {}", GIT_BRANCH);
-        SPDLOG_INFO("Build Timestamp: {}", BUILD_TIMESTAMP);
+        Logger::Info("core", "log_environment_info", "Architecture: {}", qstr(QSysInfo::buildCpuArchitecture()));
+        Logger::Info("core", "log_environment_info", "Platform: {} ({})", qstr(QSysInfo::prettyProductName()),
+            qstr(QSysInfo::productVersion()));
+        Logger::Info("core", "log_environment_info", "Hostname: {}", qstr(QSysInfo::machineHostName()));
+        Logger::Info("core", "log_environment_info", "Git Commit: {} - \"{}\"", GIT_COMMIT_HASH, GIT_COMMIT_MESSAGE);
+        Logger::Info("core", "log_environment_info", "Git Branch: {}", GIT_BRANCH);
+        Logger::Info("core", "log_environment_info", "Build Timestamp: {}", BUILD_TIMESTAMP);
     }
 }

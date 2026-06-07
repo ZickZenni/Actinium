@@ -1,6 +1,7 @@
 #include "migoto.h"
 
 #include "core/application.h"
+#include "core/logger.h"
 #include "util/fs/path.h"
 #include "util/fs/symlink.h"
 #include "util/platform/win.h"
@@ -106,7 +107,7 @@ namespace Actinium
 
         const auto& latest_version = loader_versions.front().tag_name;
 
-        SPDLOG_INFO("Using loader version: {}", latest_version);
+        Logger::Info("loader", "loader_select_version", "Using loader version: {}", latest_version);
 
         const auto game_directory_name = Path::SanitizeName(instance->GetGame()->name);
         const auto module_path = Application::GetAppDataPath() / "loaders" / game_directory_name / "3dmigoto"
@@ -323,7 +324,8 @@ namespace Actinium
 
         if (tries >= 15)
         {
-            SPDLOG_ERROR("Failed to find game process \"{}\" after 15 seconds", game->executable_name);
+            Logger::Error("loader", "start_game_using_steam_failed",
+                "Failed to find game process \"{}\" after 15 seconds", game->executable_name);
             return 0;
         }
 
@@ -340,13 +342,13 @@ namespace Actinium
 
         if (!std::filesystem::exists(instance_d3dini_path))
         {
-            SPDLOG_ERROR("Instance d3dx.ini file does not exist");
+            Logger::Error("loader", "prepare_config_file_failed", "Instance d3dx.ini file does not exist");
             return false;
         }
 
         if (!EnsureSymlink(instance_d3dini_path, loader_d3dini_path))
         {
-            SPDLOG_ERROR("Failed to create symlink");
+            Logger::Error("loader", "prepare_config_file_failed", "Failed to create symlink");
             return false;
         }
 
@@ -363,7 +365,7 @@ namespace Actinium
 
         if (ini.LoadFile(d3dini_path.string().c_str()) < 0)
         {
-            SPDLOG_ERROR("Failed to load d3dx.ini");
+            Logger::Error("loader", "modify_config_file_failed", "Failed to load d3dx.ini");
             return false;
         }
 
@@ -417,8 +419,8 @@ namespace Actinium
 
             if (library_versions.empty())
             {
-                SPDLOG_WARN(
-                    "No library versions were retrieved ({}/{})", library_repository.owner, library_repository.name);
+                Logger::Warn("loader", "prepare_library_versions_missing", "No library versions were retrieved ({}/{})",
+                    library_repository.owner, library_repository.name);
                 continue;
             }
 
@@ -427,7 +429,8 @@ namespace Actinium
 
             if (!std::filesystem::exists(library_directory))
             {
-                SPDLOG_WARN("Library path points to a non-existing directory \"{}\"", library_directory.string());
+                Logger::Warn("loader", "prepare_library_path_missing",
+                    "Library path points to a non-existing directory \"{}\"", library_directory.string());
                 continue;
             }
 
@@ -459,8 +462,8 @@ namespace Actinium
                 const auto bak_path
                     = Path::CreateNonCollidingPath(target.parent_path() / (target.filename().string() + bak_sufix));
 
-                SPDLOG_WARN(
-                    "Found non-symlink \"{}\", renaming it to \"{}\"", target.string(), bak_path.filename().string());
+                Logger::Warn("loader", "non_symlink_found", "Found non-symlink \"{}\", renaming it to \"{}\"",
+                    target.string(), bak_path.filename().string());
 
                 std::filesystem::rename(target, bak_path);
             }
