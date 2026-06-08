@@ -129,6 +129,13 @@ target_sources(Actinium PRIVATE
         src/util/software/steam.cpp
         src/util/software/steam.h
         src/core/logger.h
+        src/ui/widget/page_container.cpp
+        src/ui/widget/page_container.h
+        src/ui/page/page.h
+        src/ui/page/instance/instance_mods_page.cpp
+        src/ui/page/instance/instance_mods_page.h
+        src/ui/page/instance/instance_settings_page.cpp
+        src/ui/page/instance/instance_settings_page.h
 )
 
 if (WIN32)
