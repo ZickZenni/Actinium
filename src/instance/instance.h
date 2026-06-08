@@ -57,6 +57,10 @@ namespace Actinium
         std::vector<InstalledMod> m_installed_mods;
         efsw::WatchID m_mods_folder_watch_id;
 
+        InstalledMod *AddMod(const std::filesystem::path &directory_path);
+
+        static std::string RemoveDisabledPrefix(const std::string &name, bool* out_is_disabled);
+
         friend class Application;
     };
 }

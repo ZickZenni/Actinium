@@ -27,8 +27,6 @@ namespace Actinium
 
     void Instance::DiscoverMods()
     {
-        constexpr std::string_view DISABLED_PREFIX = "DISABLED_";
-
         const auto location = GetAbsolutePath() / "mods";
 
         Logger::Info("instance::discover_mods", "Discovering mods (path={})", location.string());
@@ -44,23 +42,8 @@ namespace Actinium
                 continue;
             }
 
-            auto mod_name = entry.path().filename().string();
-            auto disabled = false;
-
-            if (mod_name.starts_with(DISABLED_PREFIX))
-            {
-                mod_name = mod_name.substr(DISABLED_PREFIX.size());
-                disabled = true;
-            }
-
-            InstalledMod mod;
-            mod.name = mod_name;
-            mod.path = entry.path();
-            mod.disabled = disabled;
-
-            m_installed_mods.push_back(mod);
-
-            Logger::Info("instance::discover_mods", "Discovered mod (name={}, path={})", mod_name, mod.path.string());
+            const auto mod = AddMod(entry.path());
+            Logger::Info("instance::discover_mods", "Discovered mod (name={}, path={})", mod->name, mod->path.string());
         }
     }
 
@@ -116,7 +99,8 @@ namespace Actinium
 
         if (game == nullptr)
         {
-            Logger::Error("instance::load", "Failed to load instance (error=Game with the value has not been found, value={})", game_id.value());
+            Logger::Error("instance::load",
+                "Failed to load instance (error=Game with the value has not been found, value={})", game_id.value());
             return nullptr;
         }
 
@@ -134,23 +118,103 @@ namespace Actinium
     void Instance::handleFileAction(efsw::WatchID watch_id, const std::string& dir, const std::string& file_name,
         const efsw::Action action, const std::string& old_file_name)
     {
+        const auto absolute_path = GetAbsolutePath() / "mods" / file_name;
+
         switch (action)
         {
             case efsw::Actions::Add:
                 Logger::Debug("instance::watcher", "(event=add, file={}, dir={})", file_name, dir);
+
+                if (std::filesystem::is_directory(absolute_path))
+                {
+                    const auto mod = AddMod(absolute_path);
+                    Logger::Info("instance::watcher", "Added mod (name={}, path={})", mod->name, mod->path.string());
+                }
                 break;
             case efsw::Actions::Delete:
+            {
                 Logger::Debug("instance::watcher", "(event=delete, file={}, dir={})", file_name, dir);
+
+                const auto original_size = m_installed_mods.size();
+
+                std::erase_if(m_installed_mods,
+                    [&](const InstalledMod& mod)
+                    {
+                        return mod.path == absolute_path;
+                    });
+
+                if (m_installed_mods.size() < original_size)
+                {
+                    Logger::Info("instance::watcher", "Deleted mod (path={})", absolute_path.string());
+                }
+
                 break;
+            }
             case efsw::Actions::Modified:
                 Logger::Debug("instance::watcher", "(event=modify, file={}, dir={})", file_name, dir);
                 break;
             case efsw::Actions::Moved:
+            {
                 Logger::Debug("instance::watcher", "(event=move, old_file={}, new_file={}, dir={})", old_file_name,
                     file_name, dir);
+
+                const auto old_absolute_path = GetAbsolutePath() / "mods" / old_file_name;
+                const auto new_absolute_path = absolute_path;
+
+                for (auto& mod : m_installed_mods)
+                {
+                    if (mod.path == old_absolute_path)
+                    {
+                        mod.name = RemoveDisabledPrefix(file_name, &mod.disabled);
+                        mod.path = new_absolute_path;
+
+                        Logger::Info("instance::watcher", "Moved / Renamed mod (name={}, new_path={}, old_path={})",
+                            mod.name, new_absolute_path.string(), old_absolute_path.string());
+
+                        break;
+                    }
+                }
+
                 break;
+            }
             default:
                 break;
         }
+    }
+
+    InstalledMod* Instance::AddMod(const std::filesystem::path& directory_path)
+    {
+        auto disabled = false;
+        const auto mod_name = RemoveDisabledPrefix(directory_path.filename().string(), &disabled);
+
+        m_installed_mods.push_back(InstalledMod {
+            .name = mod_name,
+            .path = directory_path,
+            .disabled = disabled,
+        });
+
+        return &m_installed_mods.back();
+    }
+
+    std::string Instance::RemoveDisabledPrefix(const std::string& name, bool* out_is_disabled)
+    {
+        constexpr std::string_view DISABLED_PREFIX = "DISABLED_";
+
+        if (name.starts_with(DISABLED_PREFIX))
+        {
+            if (out_is_disabled != nullptr)
+            {
+                *out_is_disabled = true;
+            }
+
+            return name.substr(DISABLED_PREFIX.size());
+        }
+
+        if (out_is_disabled != nullptr)
+        {
+            *out_is_disabled = false;
+        }
+
+        return name;
     }
 }
