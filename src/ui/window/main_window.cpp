@@ -241,33 +241,7 @@ namespace Actinium
             }
         }
 
-        std::erase_if(m_app->m_instances,
-            [&instance](const auto& inst)
-            {
-                return inst == instance;
-            });
-
-        const auto instance_path = instance->GetAbsolutePath();
-
-        if (!std::filesystem::exists(instance_path))
-        {
-            Logger::Error(
-                "ui", "delete_instance_disk_failed", "Instance path does not exist: {}", instance_path.string());
-            return;
-        }
-
-        std::error_code delete_code;
-        std::filesystem::remove_all(instance_path, delete_code);
-
-        if (delete_code)
-        {
-            Logger::Error("ui", "delete_instance_disk_failed", "Failed to delete instance on the disk: {}",
-                delete_code.message());
-            return;
-        }
-
-        Logger::Info("ui", "delete_instance_success", "Deleted instance: {}", instance->name);
-        delete instance;
+        GApp->DeleteInstance(instance);
     }
 
     void MainWindow::OpenInstanceFolder() const

@@ -7,11 +7,12 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <efsw/efsw.hpp>
 #include <filesystem>
 
 namespace Actinium
 {
-    class Application final : public QApplication
+    class Application final : public QApplication, efsw::FileWatchListener
     {
     public:
         struct Config
@@ -32,6 +33,11 @@ namespace Actinium
          * Creates a new instance for a game.
          */
         void CreateInstance(const std::string &name, const std::string &game_id);
+
+        /**
+         * Deletes the instance and it's content saved on the disk.
+         */
+        void DeleteInstance(Instance *instance);
 
         /**
          * Launches an instance.
@@ -71,9 +77,14 @@ namespace Actinium
          */
         static std::optional<std::filesystem::path> GetSteamExecutablePath();
 
+    public:
+        void handleFileAction(efsw::WatchID watch_id, const std::string &dir, const std::string &file_name,
+            efsw::Action action, const std::string &old_file_name) override;
+
     private:
         static std::vector<Game> GAMES;
 
+        efsw::FileWatcher *m_file_watcher;
         Config m_config;
         QCommandLineParser m_parser;
         std::vector<Instance *> m_instances;
@@ -114,6 +125,7 @@ namespace Actinium
          */
         static void LogEnvironmentInfo();
 
+    private:
         friend class MainWindow;
     };
 

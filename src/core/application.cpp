@@ -89,6 +89,7 @@ namespace Actinium
 
     Application::Application(int argc, char* argv[])
         : QApplication(argc, argv)
+        , m_file_watcher(new efsw::FileWatcher())
         , m_main_window(nullptr)
     {
         setStyle(QStyleFactory::create("Fusion"));
@@ -120,6 +121,8 @@ namespace Actinium
         {
             return;
         }
+
+        m_file_watcher->watch();
 
         LogEnvironmentInfo();
         CreatePaths();
@@ -194,11 +197,48 @@ namespace Actinium
         }
 
         const auto instance = new Instance(game, name);
+        instance->m_mods_folder_watch_id
+            = m_file_watcher->addWatch((instance->GetAbsolutePath() / "mods").string(), this, false);
         instance->Save();
 
         m_instances.push_back(instance);
 
         Logger::Info("core", "create_instance_success", "Created instance: {}", name);
+    }
+
+    void Application::DeleteInstance(Instance* instance)
+    {
+        Q_CHECK_PTR(instance);
+
+        std::erase_if(m_instances,
+            [&instance](const auto& inst)
+            {
+                return inst == instance;
+            });
+
+        const auto instance_path = instance->GetAbsolutePath();
+
+        if (!std::filesystem::exists(instance_path))
+        {
+            Logger::Error(
+                "core", "delete_instance_disk_failed", "Instance path does not exist: {}", instance_path.string());
+            return;
+        }
+
+        std::error_code delete_code;
+        std::filesystem::remove_all(instance_path, delete_code);
+
+        if (delete_code)
+        {
+            Logger::Error("core", "delete_instance_disk_failed", "Failed to delete instance on the disk: {}",
+                delete_code.message());
+            return;
+        }
+
+        m_file_watcher->removeWatch(instance->m_mods_folder_watch_id);
+
+        Logger::Info("core", "delete_instance_success", "Deleted instance: {}", instance->name);
+        delete instance;
     }
 
     int Application::LaunchInstance(Instance* instance)
@@ -364,6 +404,29 @@ namespace Actinium
         return path;
     }
 
+    void Application::handleFileAction(efsw::WatchID watch_id, const std::string& dir, const std::string& file_name,
+        const efsw::Action action, const std::string& old_file_name)
+    {
+        switch (action)
+        {
+            case efsw::Actions::Add:
+                Logger::Debug("core", "watch_event", "event=add, dir={}, file={}", dir, file_name);
+                break;
+            case efsw::Actions::Delete:
+                Logger::Debug("core", "watch_event", "event=delete, dir={}, file={}", dir, file_name);
+                break;
+            case efsw::Actions::Modified:
+                Logger::Debug("core", "watch_event", "event=modify, dir={}, file={}", dir, file_name);
+                break;
+            case efsw::Actions::Moved:
+                Logger::Debug(
+                    "core", "watch_event", "event=move, dir={}, file={}, old_name={}", dir, file_name, old_file_name);
+                break;
+            default:
+                break;
+        }
+    }
+
     void Application::LoadConfig()
     {
         const auto& config_path = GetAppDataPath() / "config.json";
@@ -432,6 +495,9 @@ namespace Actinium
 
             if (instance != nullptr)
             {
+                instance->m_mods_folder_watch_id
+                    = m_file_watcher->addWatch((instance->GetAbsolutePath() / "mods").string(), this, false);
+
                 Logger::Info("core", "load_instances_load_instance_success", R"(Loaded instance "{}" from "{}")",
                     instance->name, entry.path().string());
                 m_instances.push_back(instance);

@@ -13,3 +13,6 @@
 [submodule "thirdparty/simpleini"]
 	path = thirdparty/simpleini
 	url = https://github.com/brofield/simpleini.git
+[submodule "thirdparty/efsw"]
+	path = thirdparty/efsw
+	url = https://github.com/SpartanJ/efsw.git

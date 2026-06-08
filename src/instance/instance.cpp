@@ -21,7 +21,42 @@ namespace Actinium
         : name(std::move(name))
         , m_directory_name(directory_name)
         , m_game(game)
+        , m_mods_folder_watch_id(-1)
     {
+    }
+
+    void Instance::DiscoverMods()
+    {
+        constexpr std::string_view DISABLED_PREFIX = "DISABLED_";
+
+        const auto location = GetAbsolutePath() / "mods";
+        const auto entries = std::filesystem::directory_iterator(location);
+
+        for (const auto& entry : entries)
+        {
+            if (!std::filesystem::is_directory(entry))
+            {
+                continue;
+            }
+
+            auto mod_name = entry.path().filename().string();
+            auto disabled = false;
+
+            if (mod_name.starts_with(DISABLED_PREFIX))
+            {
+                mod_name = mod_name.substr(DISABLED_PREFIX.size());
+                disabled = true;
+            }
+
+            InstalledMod mod;
+            mod.name = mod_name;
+            mod.path = entry.path();
+            mod.disabled = disabled;
+
+            Logger::Info("instance", "discover_mods_mod_found", "Found mod \"{}\"", mod.name);
+
+            m_installed_mods.push_back(mod);
+        }
     }
 
     void Instance::Save() const
@@ -31,7 +66,7 @@ namespace Actinium
 
         std::filesystem::create_directories(location / "mods");
 
-        const nlohmann::json json { { "name", name }, { "game", m_game->id } };
+        const nlohmann::json json {{"name", name}, {"game", m_game->id}};
 
         std::ofstream(instance_file) << json.dump(4);
     }
@@ -58,7 +93,8 @@ namespace Actinium
 
         if (!std::filesystem::exists(instance_file))
         {
-            Logger::Error("instance", "load_instance_failed", "instance.json does not exist inside \"{}\"", location.string());
+            Logger::Error(
+                "instance", "load_instance_failed", "instance.json does not exist inside \"{}\"", location.string());
             return nullptr;
         }
 
@@ -68,7 +104,8 @@ namespace Actinium
 
         if (!name.has_value() || !game_id.has_value())
         {
-            Logger::Error("instance", "load_instance_failed", "Invalid structured json inside instance.json inside \"{}\"", location.string());
+            Logger::Error("instance", "load_instance_failed",
+                "Invalid structured json inside instance.json inside \"{}\"", location.string());
             return nullptr;
         }
 
@@ -80,7 +117,10 @@ namespace Actinium
             return nullptr;
         }
 
-        return new Instance(game, name.value(), directory_name);
+        const auto instance = new Instance(game, name.value(), directory_name);
+        instance->DiscoverMods();
+
+        return instance;
     }
 
     std::filesystem::path Instance::GetAbsolutePath(const std::string& directory_name)

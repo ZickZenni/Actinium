@@ -68,6 +68,7 @@ add_subdirectory(thirdparty/spdlog)
 add_subdirectory(thirdparty/cpr)
 add_subdirectory(thirdparty/semver)
 add_subdirectory(thirdparty/simpleini)
+add_subdirectory(thirdparty/efsw)
 
 ### Generate Build Config / Info file ###
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
@@ -136,6 +137,7 @@ target_sources(Actinium PRIVATE
         src/ui/page/instance/instance_mods_page.h
         src/ui/page/instance/instance_settings_page.cpp
         src/ui/page/instance/instance_settings_page.h
+        src/instance/installed_mod.h
 )
 
 if (WIN32)
@@ -159,6 +161,7 @@ target_link_libraries(Actinium
         LibArchive::LibArchive
         semver
         SimpleIni::SimpleIni
+        efsw
 )
 
 ### Inclusions ###

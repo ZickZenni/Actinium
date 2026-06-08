@@ -1,7 +1,9 @@
 #pragma once
 
 #include "game/game.h"
+#include "installed_mod.h"
 
+#include <efsw/efsw.hpp>
 #include <filesystem>
 
 namespace Actinium
@@ -13,6 +15,8 @@ namespace Actinium
 
         explicit Instance(Game *game, std::string name);
         explicit Instance(Game *game, std::string name, const std::string &directory_name);
+
+        void DiscoverMods();
 
         /**
          * Saves all instances data to the disk.
@@ -47,5 +51,9 @@ namespace Actinium
     private:
         std::string m_directory_name;
         Game *m_game;
+        std::vector<InstalledMod> m_installed_mods;
+        efsw::WatchID m_mods_folder_watch_id;
+
+        friend class Application;
     };
 }
