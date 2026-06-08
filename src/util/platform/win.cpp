@@ -78,8 +78,6 @@ namespace Actinium::Windows
 
         if (!GetModuleFileNameW(nullptr, path, MAX_PATH))
         {
-            Logger::Error(
-                "util", "execute_itself_with_elevated_privileges_failed", "Failed to get module file name of current process");
             return false;
         }
 

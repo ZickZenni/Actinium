@@ -2,10 +2,8 @@
 #include "launch_instance_dialog.h"
 
 #include "core/application.h"
-#include "core/logger.h"
 #include "task/download_libraries_task.h"
 #include "task/download_loader_task.h"
-#include "util/api/github.h"
 #include "util/lib/qt.h"
 
 #include <QLabel>
@@ -59,7 +57,6 @@ namespace Actinium
         connect(m_worker, &Worker::Error, this,
             [this](const std::string& error)
             {
-                Logger::Error("ui", "launch_instance_dialog_error", "Received an error from the worker: {}", error);
                 QMessageBox::critical(nullptr, "Error", strq(error), QMessageBox::Close);
                 reject();
             });
@@ -92,8 +89,6 @@ namespace Actinium
 
     void LaunchInstanceDialog::Abort() const
     {
-        Logger::Info("ui", "launch_instance_aborted", "Aborting launch...");
-
         m_worker->Abort();
         m_abort_button->setEnabled(false);
     }

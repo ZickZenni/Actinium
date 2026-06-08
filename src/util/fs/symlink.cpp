@@ -17,7 +17,6 @@ namespace Actinium::Symlink
         if (!result)
         {
             const auto error = GetLastError();
-            Logger::Error("util", "create_symlink_failed", "CreateSymbolicLinkW failed with error code {}", error);
         }
 
         return result;
@@ -27,8 +26,6 @@ namespace Actinium::Symlink
 
         if (error_code)
         {
-            Logger::Error("util", "create_symlink_failed", "std::filesystem::create_symlink failed with error code {}",
-                error_code.value());
         }
 
         return !error_code;
@@ -43,7 +40,6 @@ namespace Actinium::Symlink
         if (result == INVALID_FILE_ATTRIBUTES)
         {
             const auto error = GetLastError();
-            Logger::Error("util", "is_symlink_failed", "GetFileAttributesW failed with error code {}", error);
         }
 
         return result;
@@ -54,8 +50,6 @@ namespace Actinium::Symlink
 
         if (error_code)
         {
-            Logger::Error("util", "is_symlink_failed", "std::filesystem::is_symlink failed with error code {}",
-                error_code.value());
         }
 
         return result;

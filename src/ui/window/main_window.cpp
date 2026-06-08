@@ -2,7 +2,6 @@
 #include "main_window.h"
 
 #include "core/application.h"
-#include "core/logger.h"
 #include "ui/delegate/instance_delegate.h"
 #include "ui/dialog/create_instance_dialog.h"
 #include "util/lib/qt.h"
@@ -51,8 +50,6 @@ namespace Actinium
 
     void MainWindow::closeEvent(QCloseEvent* event)
     {
-        Logger::Debug("ui", "main_window_close_event", "Closing main window");
-
         for (const auto& window : m_instance_windows)
         {
             window->close();
@@ -169,8 +166,6 @@ namespace Actinium
 
         if (name_value.empty() || game_value.empty())
         {
-            Logger::Error(
-                "ui", "create_instance_invalid_inputs", "Some of the inputs are empty, this should not be possible");
             return;
         }
 
@@ -197,8 +192,6 @@ namespace Actinium
         {
             return;
         }
-
-        Logger::Debug("ui", "open_instance_window", "Opening window for instance: {}", instance->name);
 
         const auto instance_window = new InstanceWindow(instance, this);
         instance_window->show();
@@ -254,7 +247,6 @@ namespace Actinium
         }
 
         const auto url = QT::CreateFileUrl(instance->GetAbsolutePath());
-        Logger::Debug("ui", "open_url", "Opening url: {}", url.toEncoded().toStdString());
 
         QDesktopServices::openUrl(url);
     }
@@ -270,7 +262,6 @@ namespace Actinium
             return;
         }
 
-        Logger::Debug("ui", "select_instance_event", "Selected instance: {}", instance->name);
         m_sidebar_rename_button->setText(QString::fromStdString(instance->name));
 
         SetSideBarState(true);
@@ -282,12 +273,8 @@ namespace Actinium
 
         if (instance_window == nullptr)
         {
-            Logger::Error("ui", "invalid_instance_window_closed", "Received non instance window pointer as sender");
             return;
         }
-
-        Logger::Debug("ui", "instance_window_close_event", "Closing window for instance: {}",
-            instance_window->GetInstance()->name);
 
         std::erase_if(m_instance_windows,
             [instance_window](const auto& window)

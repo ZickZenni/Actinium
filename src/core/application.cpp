@@ -17,6 +17,7 @@
 #include <QScreen>
 #include <QStandardPaths>
 #include <QStyleFactory>
+#include <efsw/efsw.hpp>
 #include <filesystem>
 #include <spdlog/spdlog.h>
 
@@ -99,11 +100,7 @@ namespace Actinium
         setApplicationDisplayName("Actinium");
         setApplicationVersion(VERSION);
 
-        spdlog::set_level(spdlog::level::trace);
-        spdlog::set_pattern("timestamp=%Y-%m-%dT%H:%M:%S.%e%z level=%l %v");
-
-        Logger::Info("core", "app.startup", "Running {} on v{}", applicationDisplayName().toStdString(),
-            applicationVersion().toStdString());
+        Logger::Info("app::startup", "Storage directory is located on {}", GetAppDataPath().string());
 
         LoadConfig();
 
@@ -124,7 +121,6 @@ namespace Actinium
 
         m_file_watcher->watch();
 
-        LogEnvironmentInfo();
         CreatePaths();
         LoadInstances();
         PrepareUI();
@@ -140,7 +136,7 @@ namespace Actinium
 
         for (const auto& instance : m_instances)
         {
-            delete instance;
+            DestroyInstance(instance);
         }
     }
 
@@ -197,13 +193,12 @@ namespace Actinium
         }
 
         const auto instance = new Instance(game, name);
-        instance->m_mods_folder_watch_id
-            = m_file_watcher->addWatch((instance->GetAbsolutePath() / "mods").string(), this, false);
+        const auto mods_directory = instance->GetAbsolutePath() / "mods";
+
+        instance->m_mods_folder_watch_id = m_file_watcher->addWatch(mods_directory.string(), instance, false);
         instance->Save();
 
         m_instances.push_back(instance);
-
-        Logger::Info("core", "create_instance_success", "Created instance: {}", name);
     }
 
     void Application::DeleteInstance(Instance* instance)
@@ -220,8 +215,6 @@ namespace Actinium
 
         if (!std::filesystem::exists(instance_path))
         {
-            Logger::Error(
-                "core", "delete_instance_disk_failed", "Instance path does not exist: {}", instance_path.string());
             return;
         }
 
@@ -230,22 +223,15 @@ namespace Actinium
 
         if (delete_code)
         {
-            Logger::Error("core", "delete_instance_disk_failed", "Failed to delete instance on the disk: {}",
-                delete_code.message());
             return;
         }
 
-        m_file_watcher->removeWatch(instance->m_mods_folder_watch_id);
-
-        Logger::Info("core", "delete_instance_success", "Deleted instance: {}", instance->name);
-        delete instance;
+        DestroyInstance(instance);
     }
 
     int Application::LaunchInstance(Instance* instance)
     {
         Q_CHECK_PTR(instance);
-
-        Logger::Info("core", "launch_instance", "Launching instance \"{}\"", instance->name);
 
         if (!GetGameExecutable(instance->GetGame()->id).has_value())
         {
@@ -308,18 +294,13 @@ namespace Actinium
             return 1;
         }
 
-        Logger::Info("core", "game_launch_success", "Successfully launched game process with PID {}", process_id);
-
         const auto result = MigotoLoader::InjectIntoProcess(instance, process_id);
 
         if (result == MigotoLoader::InjectResult::OK)
         {
-            Logger::Info("core", "loader_inject_success", "Successfully injected loader into game process.");
             return 0;
         }
 
-        Logger::Error(
-            "core", "loader_inject_failed", "Failed to inject loader into game process: {}", static_cast<int>(result));
         QMessageBox::critical(parent, "Error", "Failed to inject loader into game process.", QMessageBox::Close);
         return 1;
 #else
@@ -357,9 +338,6 @@ namespace Actinium
             {
                 const auto& selected_files = file_dialog.selectedFiles();
                 const auto& selected_file = selected_files.front();
-
-                Logger::Debug(
-                    "core", "game_executable_selected_file", "Selected file: {}", selected_file.toStdString());
 
                 m_config.game_executables.insert({game_id, selected_file.toStdString()});
                 SaveConfig();
@@ -404,38 +382,17 @@ namespace Actinium
         return path;
     }
 
-    void Application::handleFileAction(efsw::WatchID watch_id, const std::string& dir, const std::string& file_name,
-        const efsw::Action action, const std::string& old_file_name)
-    {
-        switch (action)
-        {
-            case efsw::Actions::Add:
-                Logger::Debug("core", "watch_event", "event=add, dir={}, file={}", dir, file_name);
-                break;
-            case efsw::Actions::Delete:
-                Logger::Debug("core", "watch_event", "event=delete, dir={}, file={}", dir, file_name);
-                break;
-            case efsw::Actions::Modified:
-                Logger::Debug("core", "watch_event", "event=modify, dir={}, file={}", dir, file_name);
-                break;
-            case efsw::Actions::Moved:
-                Logger::Debug(
-                    "core", "watch_event", "event=move, dir={}, file={}, old_name={}", dir, file_name, old_file_name);
-                break;
-            default:
-                break;
-        }
-    }
-
     void Application::LoadConfig()
     {
         const auto& config_path = GetAppDataPath() / "config.json";
 
+        Logger::Info("app::config::load", "Loading config file (file={})", config_path.string());
+
         if (!std::filesystem::exists(config_path))
         {
-            SaveConfig();
+            Logger::Warn("app::config::load", "Could not load config file (error=File does not exist)");
 
-            Logger::Warn("core", "config_load_Failed", "Could not load config, file does not exist");
+            SaveConfig();
             return;
         }
 
@@ -453,12 +410,24 @@ namespace Actinium
 
                 if (!game_executable_path.has_value())
                 {
+                    Logger::Warn("app::config::load",
+                        "Could not receive game executable value (game={}, error=Invalid value type or key does not "
+                        "exist)",
+                        game.id);
                     continue;
                 }
 
-                m_config.game_executables.insert({game.id, game_executable_path.value()});
-                Logger::Info("core", "config_found_game_path", "Found game executable \"{}\" for game \"{}\"",
-                    game_executable_path.value(), game.id);
+                const auto& value = game_executable_path.value();
+
+                if (!std::filesystem::exists(value))
+                {
+                    Logger::Warn("app::config::load",
+                        "Could not find game executable (game={}, path={}, error=File does not exist)", game.id, value);
+                    continue;
+                }
+
+                m_config.game_executables.insert({game.id, value});
+                Logger::Info("app::config::load", "Found game executable (game={}, path={})", game.id, value);
             }
         }
     }
@@ -466,16 +435,19 @@ namespace Actinium
     void Application::SaveConfig()
     {
         const auto& config_path = GetAppDataPath() / "config.json";
+
+        Logger::Info("app::config::save", "Saving config file (file={})", config_path.string());
+
         const auto& json = nlohmann::json {{"game_executables", m_config.game_executables}};
 
         std::ofstream(config_path) << json.dump(4);
-        Logger::Info("core", "config_save_success", "Saved config to \"{}\"", config_path.string());
     }
 
     void Application::LoadInstances()
     {
         const auto instances_path = GetAppDataPath() / "instances";
-        Logger::Info("core", "load_instances_started", "Loading instances in \"{}\"", instances_path.string());
+
+        Logger::Info("app::instances::load", "Loading instances (path={})", instances_path.string());
 
         const auto entries = std::filesystem::directory_iterator(instances_path);
 
@@ -483,43 +455,45 @@ namespace Actinium
         {
             if (!entry.is_directory())
             {
-                Logger::Warn("core", "load_instances_invalid_entry_found", "Skipping non-directory entry \"{}\"",
-                    entry.path().string());
+                Logger::Warn("app::instances::load", "Skipping non-directory entry (path={})", entry.path().string());
                 continue;
             }
 
             const auto name = entry.path().filename().string();
-            Logger::Info("core", "load_instances_entry_found", "Found instance directory \"{}\"", name);
-
             const auto instance = Instance::Load(name);
 
             if (instance != nullptr)
             {
                 instance->m_mods_folder_watch_id
-                    = m_file_watcher->addWatch((instance->GetAbsolutePath() / "mods").string(), this, false);
+                    = m_file_watcher->addWatch((instance->GetAbsolutePath() / "mods").string(), instance, false);
 
-                Logger::Info("core", "load_instances_load_instance_success", R"(Loaded instance "{}" from "{}")",
-                    instance->name, entry.path().string());
                 m_instances.push_back(instance);
+
+                Logger::Info("app::instances::load", "Loaded instance (name={}, path={})", name,
+                    instance->GetAbsolutePath().string());
             }
             else
             {
-                Logger::Info("core", "load_instances_load_instance_failed", R"(Failed to load instance "{}" from "{}")",
-                    name, entry.path().string());
+                Logger::Warn(
+                    "app::instances::load", "Failed to load instance (name={}, path={})", name, entry.path().string());
             }
         }
     }
 
+    void Application::DestroyInstance(const Instance* instance) const
+    {
+        Q_CHECK_PTR(instance);
+
+        m_file_watcher->removeWatch(instance->m_mods_folder_watch_id);
+        delete instance;
+    }
+
     void Application::PrepareUI()
     {
-        Logger::Debug("core", "prepare_ui", "Preparing UI for application");
-
         m_main_window = new MainWindow(this);
 
         int width, height;
         GetInitialWindowSize(width, height);
-
-        Logger::Debug("core", "prepare_ui", "Initial window size: {}x{}", width, height);
 
         m_main_window->resize(width, height);
     }
@@ -527,7 +501,6 @@ namespace Actinium
     void Application::CreatePaths()
     {
         const auto appdata_path = GetAppDataPath();
-        Logger::Info("core", "create_paths", "Using data path \"{}\"", appdata_path.string());
 
         std::filesystem::create_directories(appdata_path);
         std::filesystem::create_directories(appdata_path / "instances");
@@ -542,16 +515,5 @@ namespace Actinium
 
         out_width = std::min(screen_size.width() - 20, 1280);
         out_height = std::min(screen_size.height() - 90, 720);
-    }
-
-    void Application::LogEnvironmentInfo()
-    {
-        Logger::Info("core", "log_environment_info", "Architecture: {}", qstr(QSysInfo::buildCpuArchitecture()));
-        Logger::Info("core", "log_environment_info", "Platform: {} ({})", qstr(QSysInfo::prettyProductName()),
-            qstr(QSysInfo::productVersion()));
-        Logger::Info("core", "log_environment_info", "Hostname: {}", qstr(QSysInfo::machineHostName()));
-        Logger::Info("core", "log_environment_info", "Git Commit: {} - \"{}\"", GIT_COMMIT_HASH, GIT_COMMIT_MESSAGE);
-        Logger::Info("core", "log_environment_info", "Git Branch: {}", GIT_BRANCH);
-        Logger::Info("core", "log_environment_info", "Build Timestamp: {}", BUILD_TIMESTAMP);
     }
 }

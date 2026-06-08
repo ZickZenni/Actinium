@@ -7,12 +7,11 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
-#include <efsw/efsw.hpp>
 #include <filesystem>
 
 namespace Actinium
 {
-    class Application final : public QApplication, efsw::FileWatchListener
+    class Application final : public QApplication
     {
     public:
         struct Config
@@ -77,10 +76,6 @@ namespace Actinium
          */
         static std::optional<std::filesystem::path> GetSteamExecutablePath();
 
-    public:
-        void handleFileAction(efsw::WatchID watch_id, const std::string &dir, const std::string &file_name,
-            efsw::Action action, const std::string &old_file_name) override;
-
     private:
         static std::vector<Game> GAMES;
 
@@ -105,6 +100,8 @@ namespace Actinium
          */
         void LoadInstances();
 
+        void DestroyInstance(const Instance *instance) const;
+
         /**
          * Prepares everything UI-related.
          */
@@ -119,11 +116,6 @@ namespace Actinium
          * Calculates the initial window size for the main window.
          */
         static void GetInitialWindowSize(int &out_width, int &out_height);
-
-        /**
-         * Logs environmental information to the console / logger (spdlog) for debugging purposes.
-         */
-        static void LogEnvironmentInfo();
 
     private:
         friend class MainWindow;

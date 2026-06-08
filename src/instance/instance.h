@@ -8,7 +8,7 @@
 
 namespace Actinium
 {
-    class Instance
+    class Instance : public efsw::FileWatchListener
     {
     public:
         std::string name;
@@ -47,6 +47,9 @@ namespace Actinium
          * Constructs the absolute path of an instance folder.
          */
         static std::filesystem::path GetAbsolutePath(const std::string &directory_name);
+
+        void handleFileAction(efsw::WatchID watch_id, const std::string &dir, const std::string &file_name,
+            efsw::Action action, const std::string &old_file_name) override;
 
     private:
         std::string m_directory_name;

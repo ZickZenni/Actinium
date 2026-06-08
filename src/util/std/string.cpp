@@ -29,4 +29,17 @@ namespace Actinium::String
 
         return result;
     }
+
+    std::vector<std::string> ToVector(const int argc, char* argv[])
+    {
+        std::vector<std::string> result;
+        result.reserve(argc);
+
+        for (int i = 0; i < argc; ++i)
+        {
+            result.emplace_back(argv[i]);
+        }
+
+        return result;
+    }
 }

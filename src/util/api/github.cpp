@@ -1,10 +1,8 @@
 #include "github.h"
 
-#include "core/logger.h"
 #include "util/lib/json.h"
 
 #include <cpr/cpr.h>
-#include <spdlog/spdlog.h>
 
 namespace Actinium
 {
@@ -93,8 +91,6 @@ namespace Actinium
 
         if (result.status_code != 200)
         {
-            Logger::Error("util", "github_fetch_failed", "Request failed with status code {}", result.status_code);
-
             return std::unexpected("Status code is non 200");
         }
 
@@ -102,8 +98,6 @@ namespace Actinium
 
         if (body.empty())
         {
-            Logger::Error("util", "github_response_body_empty", "Body is empty");
-
             return std::unexpected("Body is empty");
         }
 

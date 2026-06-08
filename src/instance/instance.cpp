@@ -30,12 +30,17 @@ namespace Actinium
         constexpr std::string_view DISABLED_PREFIX = "DISABLED_";
 
         const auto location = GetAbsolutePath() / "mods";
+
+        Logger::Info("instance::discover_mods", "Discovering mods (path={})", location.string());
+
         const auto entries = std::filesystem::directory_iterator(location);
 
         for (const auto& entry : entries)
         {
             if (!std::filesystem::is_directory(entry))
             {
+                Logger::Warn(
+                    "instance::discover_mods", "Skipping non-directory entry (path={})", entry.path().string());
                 continue;
             }
 
@@ -53,9 +58,9 @@ namespace Actinium
             mod.path = entry.path();
             mod.disabled = disabled;
 
-            Logger::Info("instance", "discover_mods_mod_found", "Found mod \"{}\"", mod.name);
-
             m_installed_mods.push_back(mod);
+
+            Logger::Info("instance::discover_mods", "Discovered mod (name={}, path={})", mod_name, mod.path.string());
         }
     }
 
@@ -93,8 +98,7 @@ namespace Actinium
 
         if (!std::filesystem::exists(instance_file))
         {
-            Logger::Error(
-                "instance", "load_instance_failed", "instance.json does not exist inside \"{}\"", location.string());
+            Logger::Error("instance::load", "Failed to load instance (error=instance.json file does not exist)");
             return nullptr;
         }
 
@@ -104,8 +108,7 @@ namespace Actinium
 
         if (!name.has_value() || !game_id.has_value())
         {
-            Logger::Error("instance", "load_instance_failed",
-                "Invalid structured json inside instance.json inside \"{}\"", location.string());
+            Logger::Error("instance::load", "Failed to load instance (error=Invalid structured instance.json)");
             return nullptr;
         }
 
@@ -113,7 +116,7 @@ namespace Actinium
 
         if (game == nullptr)
         {
-            Logger::Error("instance", "load_instance_failed", "Game with id \"{}\" does not exist", game_id.value());
+            Logger::Error("instance::load", "Failed to load instance (error=Game with the value has not been found, value={})", game_id.value());
             return nullptr;
         }
 
@@ -126,5 +129,28 @@ namespace Actinium
     std::filesystem::path Instance::GetAbsolutePath(const std::string& directory_name)
     {
         return Application::GetAppDataPath() / "instances" / directory_name;
+    }
+
+    void Instance::handleFileAction(efsw::WatchID watch_id, const std::string& dir, const std::string& file_name,
+        const efsw::Action action, const std::string& old_file_name)
+    {
+        switch (action)
+        {
+            case efsw::Actions::Add:
+                Logger::Debug("instance::watcher", "(event=add, file={}, dir={})", file_name, dir);
+                break;
+            case efsw::Actions::Delete:
+                Logger::Debug("instance::watcher", "(event=delete, file={}, dir={})", file_name, dir);
+                break;
+            case efsw::Actions::Modified:
+                Logger::Debug("instance::watcher", "(event=modify, file={}, dir={})", file_name, dir);
+                break;
+            case efsw::Actions::Moved:
+                Logger::Debug("instance::watcher", "(event=move, old_file={}, new_file={}, dir={})", old_file_name,
+                    file_name, dir);
+                break;
+            default:
+                break;
+        }
     }
 }

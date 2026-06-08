@@ -1,7 +1,5 @@
 #include "archive.h"
 
-#include "core/logger.h"
-
 #include <archive_entry.h>
 #include <spdlog/spdlog.h>
 
@@ -37,9 +35,6 @@ namespace Actinium
             return {.code = result, .message = message};
         }
 
-        Logger::Debug("util", "extract_archive_started", "Extracting files from archive \"{}\" to \"{}\"",
-            file_path.string(), extract_path.string());
-
         archive_entry* entry;
         int entries_found = 0;
         int success_extractions = 0;
@@ -47,7 +42,6 @@ namespace Actinium
         while (archive_read_next_header(read_archive, &entry) == ARCHIVE_OK)
         {
             const auto entry_file_name = std::string(archive_entry_pathname(entry));
-            Logger::Debug("util", "extract_archive_entry_found", "Found entry inside archive \"{}\"", entry_file_name);
 
             archive_entry_set_pathname(entry, (extract_path / entry_file_name).string().c_str());
 
@@ -57,26 +51,17 @@ namespace Actinium
 
                 if (archive_write_finish_entry(write_archive) != ARCHIVE_OK)
                 {
-                    Logger::Error("util", "extract_file_failed", "archive_write_finish_entry() error: {}",
-                        archive_error_string(write_archive));
                 }
                 else
                 {
-                    Logger::Debug("util", "extract_file_success", "Success extracting file \"{}\"", entry_file_name);
-                    success_extractions++;
                 }
             }
             else
             {
-                Logger::Error("util", "extract_file_failed", "archive_write_header() error: {}",
-                    archive_error_string(write_archive));
             }
 
             entries_found++;
         }
-
-        Logger::Debug("util", "extract_archive_success", "Finished extracting files {}/{} from archive \"{}\"",
-            success_extractions, entries_found, file_path.string());
 
         archive_read_close(read_archive);
         archive_read_free(read_archive);
