@@ -138,6 +138,9 @@ target_sources(Actinium PRIVATE
         src/ui/page/instance/instance_settings_page.cpp
         src/ui/page/instance/instance_settings_page.h
         src/instance/installed_mod.h
+        src/ui/view/mod_list_view.cpp
+        src/ui/view/mod_list_view.h
+        src/ui/model/proxy_model.h
 )
 
 if (WIN32)

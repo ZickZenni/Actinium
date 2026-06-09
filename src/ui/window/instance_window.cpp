@@ -17,6 +17,9 @@ namespace Actinium
 
         const auto container
             = new PageContainer({new InstanceModsPage(instance, this), new InstanceSettingsPage(instance, this)}, this);
+        container->setObjectName("InstancePageContainer");
+        container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
         setCentralWidget(container);
         setContentsMargins(0, 0, 0, 0);
     }

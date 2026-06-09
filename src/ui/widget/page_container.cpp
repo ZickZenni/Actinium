@@ -14,26 +14,14 @@ namespace Actinium
         : QWidget(parent)
         , m_pages(pages)
     {
-        const auto layout = new QHBoxLayout(this);
-        layout->setContentsMargins(0, 0, 0, 0);
-
-        const auto button_container = new QWidget(this);
-        const auto button_layout = new QVBoxLayout(button_container);
-        button_container->setLayout(button_layout);
-        button_container->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-        button_container->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-        button_container->setMinimumWidth(150);
-
-        const auto page_container = new QWidget(this);
-        m_page_layout = new QStackedLayout(page_container);
-        page_container->setLayout(m_page_layout);
-
-        layout->addWidget(button_container);
-        layout->addWidget(page_container);
+        const auto button_layout = new QVBoxLayout();
+        m_page_layout = new QStackedLayout();
 
         for (auto index = 0; index < m_pages.size(); ++index)
         {
             const auto page = m_pages[index];
+            page->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding);
+
             m_page_layout->addWidget(page);
 
             const auto button_text = page->GetButtonText();
@@ -46,6 +34,14 @@ namespace Actinium
         }
 
         button_layout->addStretch();
+
+        const auto m_layout = new QGridLayout();
+        m_layout->addLayout(button_layout, 0, 0, 1, 1);
+        m_layout->addLayout(m_page_layout, 0, 1, 1, 1);
+        m_layout->setColumnStretch(1, 4);
+        m_layout->setContentsMargins(0, 0, 0, 0);
+
+        setLayout(m_layout);
     }
 
     void PageContainer::OnPageButtonClicked() const
@@ -74,5 +70,4 @@ namespace Actinium
 
         m_page_layout->setCurrentIndex(index);
     }
-}
-// ReSharper restore CppDFAMemoryLeak
+} 

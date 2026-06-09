@@ -39,6 +39,11 @@ namespace Actinium
         [[nodiscard]] Game *GetGame() const;
 
         /**
+         * Retrieves the mods of the instance.
+         */
+        [[nodiscard]] const std::vector<InstalledMod>& GetMods() const;
+
+        /**
          * Loads an instance into memory by reading the data saved on the disk.
          */
         static Instance *Load(const std::string &directory_name);

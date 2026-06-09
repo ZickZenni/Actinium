@@ -74,6 +74,11 @@ namespace Actinium
         return m_game;
     }
 
+    const std::vector<InstalledMod>& Instance::GetMods() const
+    {
+        return m_installed_mods;
+    }
+
     Instance* Instance::Load(const std::string& directory_name)
     {
         const auto location = GetAbsolutePath(directory_name);
