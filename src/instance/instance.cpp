@@ -17,9 +17,9 @@ namespace Actinium
     {
     }
 
-    Instance::Instance(Game* game, std::string name, const std::string& directory_name)
+    Instance::Instance(Game* game, std::string name, std::string directory_name)
         : name(std::move(name))
-        , m_directory_name(directory_name)
+        , m_directory_name(std::move(directory_name))
         , m_game(game)
         , m_mods_folder_watch_id(-1)
     {
@@ -59,6 +59,52 @@ namespace Actinium
         const nlohmann::json json {{"name", name}, {"game", m_game->id}};
 
         std::ofstream(instance_file) << json.dump(4);
+    }
+
+    void Instance::SetModEnabled(const InstalledMod& mod, const bool state)
+    {
+        const auto actual_mod = std::ranges::find_if(m_installed_mods,
+            [&mod](const InstalledMod& v)
+            {
+                return v.name == mod.name && v.path == mod.path;
+            });
+
+        if (actual_mod == m_installed_mods.end())
+        {
+            return;
+        }
+
+        if (actual_mod->disabled == !state)
+        {
+            return;
+        }
+
+        Logger::Info("instance::set_mod_enabled", "Set mod {} (name={}, path={})", state ? "enabled" : "disabled",
+            mod.name, mod.path.string());
+        actual_mod->disabled = !state;
+
+        if (actual_mod->disabled)
+        {
+            const auto parent_dir = actual_mod->path.parent_path();
+            const auto folder_name = actual_mod->path.filename().string();
+
+            const auto old_path = actual_mod->path;
+            const auto new_path = parent_dir / ("DISABLED_" + folder_name);
+
+            actual_mod->path = new_path;
+            std::filesystem::rename(old_path, new_path);
+        }
+        else
+        {
+            const auto parent_dir = actual_mod->path.parent_path();
+            const auto folder_name = actual_mod->path.filename().string();
+
+            const auto old_path = actual_mod->path;
+            const auto new_path = parent_dir / RemoveDisabledPrefix(folder_name, nullptr);
+
+            actual_mod->path = new_path;
+            std::filesystem::rename(old_path, new_path);
+        }
     }
 
     std::filesystem::path Instance::GetAbsolutePath() const
@@ -130,6 +176,7 @@ namespace Actinium
         switch (action)
         {
             case efsw::Actions::Add:
+            {
                 Logger::Debug("instance::watcher", "(event=add, file={}, dir={})", file_name, dir);
 
                 if (std::filesystem::is_directory(absolute_path))
@@ -138,6 +185,7 @@ namespace Actinium
                     Logger::Info("instance::watcher", "Added mod (name={}, path={})", mod->name, mod->path.string());
                 }
                 break;
+            }
             case efsw::Actions::Delete:
             {
                 Logger::Debug("instance::watcher", "(event=delete, file={}, dir={})", file_name, dir);
@@ -158,15 +206,17 @@ namespace Actinium
                 break;
             }
             case efsw::Actions::Modified:
+            {
                 Logger::Debug("instance::watcher", "(event=modify, file={}, dir={})", file_name, dir);
                 break;
+            }
             case efsw::Actions::Moved:
             {
                 Logger::Debug("instance::watcher", "(event=move, old_file={}, new_file={}, dir={})", old_file_name,
                     file_name, dir);
 
                 const auto old_absolute_path = GetAbsolutePath() / "mods" / old_file_name;
-                const auto new_absolute_path = absolute_path;
+                const auto& new_absolute_path = absolute_path;
 
                 for (auto& mod : m_installed_mods)
                 {

@@ -14,7 +14,7 @@ namespace Actinium
         std::string name;
 
         explicit Instance(Game *game, std::string name);
-        explicit Instance(Game *game, std::string name, const std::string &directory_name);
+        explicit Instance(Game *game, std::string name, std::string directory_name);
 
         /**
          * Discovers all mods saved on the disk.
@@ -25,6 +25,11 @@ namespace Actinium
          * Saves all instances data to the disk.
          */
         void Save() const;
+
+        /**
+         * Enables or disables the specified mod.
+         */
+        void SetModEnabled(const InstalledMod &mod, bool state);
 
         /**
          * Retrieves the absolute path of the folder, where all data is stored in.
@@ -44,7 +49,7 @@ namespace Actinium
         /**
          * Retrieves the mods of the instance.
          */
-        [[nodiscard]] const std::vector<InstalledMod>& GetMods() const;
+        [[nodiscard]] const std::vector<InstalledMod> &GetMods() const;
 
         /**
          * Loads an instance into memory by reading the data saved on the disk.
@@ -67,7 +72,7 @@ namespace Actinium
 
         InstalledMod *AddMod(const std::filesystem::path &directory_path);
 
-        static std::string RemoveDisabledPrefix(const std::string &name, bool* out_is_disabled);
+        static std::string RemoveDisabledPrefix(const std::string &name, bool *out_is_disabled);
 
         friend class Application;
     };
