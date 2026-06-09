@@ -26,7 +26,7 @@ namespace Actinium
         m_list_view->setAlternatingRowColors(true);
         m_list_view->setUniformRowHeights(true);
         m_list_view->setSortingEnabled(true);
-        m_list_view->sortByColumn(0, Qt::AscendingOrder);
+        m_list_view->sortByColumn(1, Qt::AscendingOrder);
         m_list_view->setFrameShape(QFrame::NoFrame);
 
         layout->addWidget(m_list_view);

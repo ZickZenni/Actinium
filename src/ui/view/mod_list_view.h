@@ -25,6 +25,10 @@ namespace Actinium
 
         int rowCount(const QModelIndex &parent) const override;
 
+        Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+        bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
     private:
         Instance *m_instance;
     };

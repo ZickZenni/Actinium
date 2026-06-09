@@ -27,7 +27,7 @@ namespace Actinium
             return 0;
         }
 
-        return 2;
+        return 3;
     }
 
     QVariant ModListModel::data(const QModelIndex& index, const int role) const
@@ -45,13 +45,22 @@ namespace Actinium
             {
                 switch (index.column())
                 {
-                    case 0:
-                        return QString::fromStdString(mod.name);
                     case 1:
+                        return QString::fromStdString(mod.name);
+                    case 2:
                         return QString::fromStdString("Unknown");
                     default:
                         return {};
                 }
+            }
+            case Qt::CheckStateRole:
+            {
+                if (index.column() == 0)
+                {
+                    return mod.disabled ? Qt::Unchecked : Qt::Checked;
+                }
+
+                return {};
             }
             default:
                 return {};
@@ -70,8 +79,10 @@ namespace Actinium
             switch (section)
             {
                 case 0:
-                    return "Name";
+                    return "Enabled";
                 case 1:
+                    return "Name";
+                case 2:
                     return "Version";
                 default:
                     break;
@@ -89,6 +100,37 @@ namespace Actinium
         }
 
         return m_instance->GetMods().size();
+    }
+
+    Qt::ItemFlags ModListModel::flags(const QModelIndex& index) const
+    {
+        const auto default_flags = QAbstractItemModel::flags(index);
+
+        if (index.column() == 0)
+        {
+            return default_flags | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled;
+        }
+
+        return default_flags;
+    }
+
+    bool ModListModel::setData(const QModelIndex& index, const QVariant& value, const int role)
+    {
+        if (!index.isValid())
+        {
+            return false;
+        }
+
+        if (role == Qt::CheckStateRole && index.column() == 0)
+        {
+            const auto state = static_cast<Qt::CheckState>(value.toInt());
+            m_instance->SetModEnabled(m_instance->GetMods().at(index.row()), state == Qt::Checked);
+
+            emit dataChanged(index, index, {Qt::CheckStateRole});
+            return true;
+        }
+
+        return false;
     }
 
     ModListView::ModListView(QWidget* parent)
