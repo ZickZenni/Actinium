@@ -12,6 +12,8 @@
 
 namespace Actinium
 {
+    constexpr std::string_view DISABLED_PREFIX = "DISABLED_";
+
     Instance::Instance(Game* game, std::string name)
         : Instance(game, std::move(name), Path::SanitizeName(name))
     {
@@ -89,7 +91,7 @@ namespace Actinium
             const auto folder_name = actual_mod->path.filename().string();
 
             const auto old_path = actual_mod->path;
-            const auto new_path = parent_dir / ("DISABLED_" + folder_name);
+            const auto new_path = parent_dir / (DISABLED_PREFIX.data() + folder_name);
 
             actual_mod->path = new_path;
             std::filesystem::rename(old_path, new_path);
@@ -255,8 +257,6 @@ namespace Actinium
 
     std::string Instance::RemoveDisabledPrefix(const std::string& name, bool* out_is_disabled)
     {
-        constexpr std::string_view DISABLED_PREFIX = "DISABLED_";
-
         if (name.starts_with(DISABLED_PREFIX))
         {
             if (out_is_disabled != nullptr)
