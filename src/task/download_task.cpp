@@ -1,5 +1,6 @@
 #include "download_task.h"
 
+#include "core/logger.h"
 #include "worker/worker.h"
 
 #include <QtAssert>
@@ -14,6 +15,8 @@ namespace Actinium
 
     cpr::Response DownloadTask::Download(const std::string& url, std::ofstream& output_stream)
     {
+        Logger::Debug("download_task::download", "Begin downloading file (url={})", url);
+
         const auto callback = cpr::ProgressCallback { OnDownloadProgress, reinterpret_cast<intptr_t>(this) };
         return cpr::Download(output_stream, cpr::Url { url }, callback);
     }
