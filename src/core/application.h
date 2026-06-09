@@ -100,6 +100,9 @@ namespace Actinium
          */
         void LoadInstances();
 
+        /**
+         * Destroys the current instance and releases any associated resources.
+         */
         void DestroyInstance(const Instance *instance) const;
 
         /**
