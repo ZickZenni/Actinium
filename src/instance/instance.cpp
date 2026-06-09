@@ -27,6 +27,8 @@ namespace Actinium
 
     void Instance::DiscoverMods()
     {
+        m_installed_mods.clear();
+
         const auto location = GetAbsolutePath() / "mods";
 
         Logger::Info("instance::discover_mods", "Discovering mods (path={})", location.string());
