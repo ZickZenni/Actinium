@@ -1,5 +1,7 @@
 #include "instance_settings_page.h"
 
+#include <QPushButton>
+
 namespace Actinium
 {
     InstanceSettingsPage::InstanceSettingsPage(Instance* instance, QWidget* parent)
@@ -7,6 +9,8 @@ namespace Actinium
         , m_instance(instance)
     {
         setObjectName("InstanceSettingsPage");
+
+        const auto test_button = new QPushButton("Settings", this);
     }
 
     QString InstanceSettingsPage::GetButtonText()
