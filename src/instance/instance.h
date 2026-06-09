@@ -16,6 +16,9 @@ namespace Actinium
         explicit Instance(Game *game, std::string name);
         explicit Instance(Game *game, std::string name, const std::string &directory_name);
 
+        /**
+         * Discovers all mods saved on the disk.
+         */
         void DiscoverMods();
 
         /**
