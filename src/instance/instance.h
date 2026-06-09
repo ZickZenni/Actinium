@@ -61,6 +61,15 @@ namespace Actinium
          */
         static std::filesystem::path GetAbsolutePath(const std::string &directory_name);
 
+        /**
+         * efsw::FileWatchListener: Handles the action file action
+         *
+         * @param watch_id The watch id for the directory
+         * @param dir The directory
+         * @param file_name The filename that was accessed (not the full path)
+         * @param action Action that was performed
+         * @param old_file_name The name of the file or directory moved
+         */
         void handleFileAction(efsw::WatchID watch_id, const std::string &dir, const std::string &file_name,
             efsw::Action action, const std::string &old_file_name) override;
 
@@ -70,8 +79,14 @@ namespace Actinium
         std::vector<InstalledMod> m_installed_mods;
         efsw::WatchID m_mods_folder_watch_id;
 
+        /**
+         * Adds a new mod to the instance.
+         */
         InstalledMod *AddMod(const std::filesystem::path &directory_path);
 
+        /**
+         * Removes the disabled prefix from the given name.
+         */
         static std::string RemoveDisabledPrefix(const std::string &name, bool *out_is_disabled);
 
         friend class Application;
