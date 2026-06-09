@@ -1,9 +1,10 @@
 #include "symlink.h"
 
-#include "core/logger.h"
-
 #include <spdlog/spdlog.h>
+
+#ifdef WIN32
 #include <windows.h>
+#endif
 
 namespace Actinium::Symlink
 {

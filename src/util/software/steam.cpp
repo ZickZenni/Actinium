@@ -1,8 +1,8 @@
 #include "steam.h"
 
+#ifdef WIN32
 #include "util/platform/win.h"
-
-#include <windows.h>
+#endif
 
 namespace Actinium::Steam
 {

@@ -1,10 +1,12 @@
 #include "migoto.h"
 
+#ifdef WIN32
+#include "util/platform/win.h"
+#endif
+
 #include "core/application.h"
-#include "core/logger.h"
 #include "util/fs/path.h"
 #include "util/fs/symlink.h"
-#include "util/platform/win.h"
 
 #include <SimpleIni.h>
 #include <semver.hpp>
