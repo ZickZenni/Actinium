@@ -2,6 +2,7 @@
 
 #include "ui/page/page.h"
 
+#include <QStackedLayout>
 #include <QWidget>
 
 namespace Actinium
@@ -15,11 +16,13 @@ namespace Actinium
 
     private:
         std::vector<Page *> m_pages;
-        int m_current_page;
+        QStackedLayout *m_page_layout;
+
+        void OnPageButtonClicked() const;
 
         /**
          * Sets the current page in the container.
          */
-        void SetCurrentPage(int index);
+        void SetCurrentPage(int index) const;
     };
 }

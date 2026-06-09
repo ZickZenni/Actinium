@@ -1,15 +1,18 @@
 // ReSharper disable CppDFAMemoryLeak
 #include "page_container.h"
 
+#include "core/logger.h"
+
 #include <QPushButton>
 #include <QVBoxLayout>
 
 namespace Actinium
 {
+    constexpr auto BUTTON_PROPERTY__PAGE_INDEX_KEY = "pageIndex";
+
     PageContainer::PageContainer(const std::vector<Page*>& pages, QWidget* parent)
         : QWidget(parent)
         , m_pages(pages)
-        , m_current_page(-1)
     {
         const auto layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
@@ -22,49 +25,54 @@ namespace Actinium
         button_container->setMinimumWidth(150);
 
         const auto page_container = new QWidget(this);
+        m_page_layout = new QStackedLayout(page_container);
+        page_container->setLayout(m_page_layout);
+
         layout->addWidget(button_container);
         layout->addWidget(page_container);
 
-        int index = 0;
-
-        for (const auto& page : m_pages)
+        for (auto index = 0; index < m_pages.size(); ++index)
         {
+            const auto page = m_pages[index];
+            m_page_layout->addWidget(page);
+
             const auto button_text = page->GetButtonText();
             const auto page_button = new QPushButton(button_text, this);
             page_button->setObjectName(button_text + "Button");
-
+            page_button->setProperty(BUTTON_PROPERTY__PAGE_INDEX_KEY, index);
             button_layout->addWidget(page_button);
 
-            connect(page_button, &QPushButton::clicked, page,
-                [this, index]
-                {
-                    SetCurrentPage(index);
-                });
-
-            page->setParent(page_container);
-            page->setVisible(false);
-            index++;
+            connect(page_button, &QPushButton::clicked, this, &PageContainer::OnPageButtonClicked);
         }
 
         button_layout->addStretch();
-
-        SetCurrentPage(0);
     }
 
-    void PageContainer::SetCurrentPage(const int index)
+    void PageContainer::OnPageButtonClicked() const
     {
-        if (index < 0 || index >= m_pages.size())
+        const auto button = qobject_cast<QPushButton*>(sender());
+
+        if (button == nullptr)
         {
             return;
         }
 
-        if (m_current_page >= 0 || m_current_page < m_pages.size())
+        const auto index = button->property(BUTTON_PROPERTY__PAGE_INDEX_KEY).toInt();
+
+        Logger::Debug("ui::widget::page_container", "QPushButton::clicked event received (index={})", index);
+        SetCurrentPage(index);
+    }
+
+    void PageContainer::SetCurrentPage(const int index) const
+    {
+        const auto& size_index = static_cast<std::size_t>(index);
+
+        if (index < 0 || size_index >= m_page_layout->count())
         {
-            m_pages.at(m_current_page)->setVisible(false);
+            return;
         }
 
-        m_pages.at(index)->setVisible(true);
-        m_current_page = index;
+        m_page_layout->setCurrentIndex(index);
     }
 }
 // ReSharper restore CppDFAMemoryLeak
