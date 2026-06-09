@@ -141,6 +141,8 @@ target_sources(Actinium PRIVATE
         src/ui/view/mod_list_view.cpp
         src/ui/view/mod_list_view.h
         src/ui/model/proxy_model.h
+        src/ui/window/base_window.h
+        src/ui/window/base_window.cpp
 )
 
 if (WIN32)

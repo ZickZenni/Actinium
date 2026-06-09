@@ -18,7 +18,7 @@
 namespace Actinium
 {
     MainWindow::MainWindow(Application* app, QWidget* widget)
-        : QMainWindow(widget)
+        : BaseWindow(widget)
         , m_app(app)
         , m_central_widget(nullptr)
         , m_instance_list_model(nullptr)
@@ -48,15 +48,13 @@ namespace Actinium
         QMetaObject::connectSlotsByName(this);
     }
 
-    void MainWindow::closeEvent(QCloseEvent* event)
+    void MainWindow::OnClose()
     {
         for (const auto& window : m_instance_windows)
         {
             window->close();
             delete window;
         }
-
-        event->accept();
     }
 
     void MainWindow::PrepareInstanceView()
@@ -196,7 +194,7 @@ namespace Actinium
         const auto instance_window = new InstanceWindow(instance, this);
         instance_window->show();
 
-        connect(instance_window, &InstanceWindow::IsClosing, this, &MainWindow::OnInstanceWindowClosed);
+        connect(instance_window, &InstanceWindow::closed, this, &MainWindow::OnInstanceWindowClosed);
 
         m_instance_windows.push_back(instance_window);
     }

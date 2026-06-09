@@ -1,11 +1,11 @@
 #pragma once
-#include "instance/instance.h"
 
-#include <QMainWindow>
+#include "base_window.h"
+#include "instance/instance.h"
 
 namespace Actinium
 {
-    class InstanceWindow : public QMainWindow
+    class InstanceWindow : public BaseWindow
     {
         Q_OBJECT
 
@@ -16,12 +16,6 @@ namespace Actinium
         {
             return m_instance;
         }
-
-    signals:
-        void IsClosing();
-
-    protected:
-        void closeEvent(QCloseEvent *event) override;
 
     private:
         Instance *m_instance;

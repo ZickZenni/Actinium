@@ -9,7 +9,7 @@
 namespace Actinium
 {
     InstanceWindow::InstanceWindow(Instance* instance, QWidget* parent)
-        : QMainWindow(parent)
+        : BaseWindow(parent)
         , m_instance(instance)
     {
         setAttribute(Qt::WA_DeleteOnClose);
@@ -22,11 +22,5 @@ namespace Actinium
 
         setCentralWidget(container);
         setContentsMargins(0, 0, 0, 0);
-    }
-
-    void InstanceWindow::closeEvent(QCloseEvent* event)
-    {
-        emit IsClosing();
-        event->accept();
     }
 }

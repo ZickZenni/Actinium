@@ -5,14 +5,13 @@
 #include "ui/view/instance_view.h"
 #include "ui/widget/sidebar.h"
 
-#include <QMainWindow>
 #include <QPushButton>
 
 namespace Actinium
 {
     class Application;
 
-    class MainWindow final : public QMainWindow
+    class MainWindow final : public BaseWindow
     {
         Q_OBJECT
 
@@ -20,7 +19,7 @@ namespace Actinium
         explicit MainWindow(Application *app, QWidget *widget = nullptr);
 
     protected:
-        void closeEvent(QCloseEvent *event) override;
+        void OnClose() override;
 
     private:
         Application *m_app;
