@@ -1,5 +1,7 @@
 #include "application.h"
 
+#include "provider/game_banana_provider.h"
+
 #ifdef WIN32
 #include "util/platform/win.h"
 #endif
@@ -37,7 +39,10 @@ namespace Actinium
                 },
             },
             .steam_app_id = std::nullopt,
-            .steam_start_parameters = {}
+            .steam_start_parameters = {},
+            .providers = {
+                new GameBananaProvider(8552)
+            }
         },
         {
             .id = "honkai_star_rail",
@@ -51,7 +56,10 @@ namespace Actinium
                 },
             },
             .steam_app_id = std::nullopt,
-            .steam_start_parameters = {}
+            .steam_start_parameters = {},
+            .providers = {
+                new GameBananaProvider(18366)
+            }
         },
         {
             .id = "zenless_zone_zero",
@@ -65,7 +73,10 @@ namespace Actinium
                 },
             },
             .steam_app_id = std::nullopt,
-            .steam_start_parameters = {}
+            .steam_start_parameters = {},
+            .providers = {
+                new GameBananaProvider(19567)
+            }
         },
         {
             .id = "wuthering_waves",
@@ -84,6 +95,9 @@ namespace Actinium
                 "-dx11",
                 "-d3d11",
             },
+            .providers = {
+                new GameBananaProvider(20357)
+            }
         }
     };
     // clang-format on

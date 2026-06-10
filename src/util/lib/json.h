@@ -2,6 +2,19 @@
 
 #include <nlohmann/json.hpp>
 
+#define JSON_CHECK_INVALID_VAR(json, name, type) if (!nlohmann::try_get<type>(json, name).has_value())
+#define JSON_REQUIRE_VAR(json, name, type, ret)                                                                        \
+    JSON_CHECK_INVALID_VAR(json, name, type)                                                                           \
+    {                                                                                                                  \
+        return ret;                                                                                                    \
+    }
+#define JSON_REQUIRE_VAR_DEBUG(json, name, type, ret, debug_component, debug_msg)                                      \
+    JSON_CHECK_INVALID_VAR(json, name, type)                                                                           \
+    {                                                                                                                  \
+        Logger::Error(debug_component, "{} (error=missing or invalid {})", debug_msg, name);                                                                                               \
+        return ret;                                                                                                    \
+    }
+
 namespace nlohmann
 {
     /**

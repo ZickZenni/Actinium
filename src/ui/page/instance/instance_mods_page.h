@@ -19,5 +19,7 @@ namespace Actinium
         ProxyModel *m_list_proxy_model;
         ModListModel *m_list_model;
         ModListView *m_list_view;
+
+        void OnDownloadModsClicked();
     };
 }
