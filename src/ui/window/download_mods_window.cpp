@@ -9,23 +9,29 @@ namespace Actinium
         : BaseWindow(parent)
         , m_instance(instance)
     {
-        m_instance->GetGame()->providers.at(0)->GetMods(QT::QueuedCallback(this,
-            [](DownloadModsWindow* self, const Provider::SearchResponse& response)
-            {
-                self->m_search_response = response;
+        const auto& providers = m_instance->GetGame()->providers;
 
-                if (self->m_search_response.has_value())
-                {
-                    for (const auto& mod : self->m_search_response.value().mods)
-                    {
-                        Logger::Debug("ui::download_mods_window", "Found mod: {}", mod.name);
-                    }
-                }
-            }));
+        if (!providers.empty())
+        {
+            providers.at(0)->GetMods(QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
+        }
     }
 
     DownloadModsWindow::~DownloadModsWindow()
     {
         Logger::Debug("ui::download_mods_window", "Destructor called");
+    }
+
+    void DownloadModsWindow::OnSearchResponse(DownloadModsWindow* self, const Provider::SearchResponse& response)
+    {
+        self->m_search_response = response;
+
+        if (self->m_search_response.has_value())
+        {
+            for (const auto& mod : self->m_search_response.value().mods)
+            {
+                Logger::Debug("ui::download_mods_window", "Found mod: {}", mod.name);
+            }
+        }
     }
 }

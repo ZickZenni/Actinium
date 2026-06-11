@@ -16,5 +16,7 @@ namespace Actinium
     private:
         Instance* m_instance;
         std::optional<Provider::SearchResponse> m_search_response;
+
+        static void OnSearchResponse(DownloadModsWindow* self, const Provider::SearchResponse& response);
     };
 }
