@@ -1,5 +1,7 @@
 #include "qt.h"
 
+#include <QApplication>
+
 namespace Actinium::QT
 {
     QSize ViewItemTextSize(const QStyleOptionViewItem& option)

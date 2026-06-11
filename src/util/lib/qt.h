@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QApplication>
+#include <QPointer>
 #include <QStyleOptionViewItem>
 #include <QTextLayout>
 #include <filesystem>
@@ -34,4 +34,33 @@ namespace Actinium::QT
      * Converts a QStringList to a std::string vector.
      */
     std::vector<std::string> ToStdVector(const QStringList &list);
+
+    /**
+     * Creates a thread-safe callback function for QT objects.
+     */
+    template<typename QObjectType, typename Func> auto QueuedCallback(QObjectType *object, Func &&func)
+    {
+        QPointer<QObjectType> self(object);
+
+        return [self, func = std::forward<Func>(func)]<typename... T>(T &&...args) mutable
+        {
+            if (self == nullptr)
+            {
+                return;
+            }
+
+            QMetaObject::invokeMethod(
+                self,
+                [self, func, ... captured_args = std::forward<T>(args)]() mutable
+                {
+                    if (self == nullptr)
+                    {
+                        return;
+                    }
+
+                    std::invoke(func, self, std::move(captured_args)...);
+                },
+                Qt::QueuedConnection);
+        };
+    }
 }
