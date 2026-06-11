@@ -2,6 +2,7 @@
 
 #include "game/game.h"
 #include "instance/instance.h"
+#include "ui/icon_cache.h"
 #include "ui/window/main_window.h"
 #include "util/api/github.h"
 
@@ -57,6 +58,11 @@ namespace Actinium
         std::optional<std::filesystem::path> GetGameExecutable(const std::string &game_id);
 
         /**
+         * Retrieves the icon cache of the application.
+         */
+        [[nodiscard]] IconCache* GetIconCache() const;
+
+        /**
          * Retrieves the appdata path for the application.
          */
         static std::filesystem::path GetAppDataPath();
@@ -84,6 +90,7 @@ namespace Actinium
         QCommandLineParser m_parser;
         std::vector<Instance *> m_instances;
         MainWindow *m_main_window;
+        IconCache* m_icon_cache;
 
         /**
          * Loads the configuration settings for the application.

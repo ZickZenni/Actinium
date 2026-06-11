@@ -38,29 +38,61 @@ namespace Actinium::QT
     /**
      * Creates a thread-safe callback function for QT objects.
      */
-    template<typename QObjectType, typename Func> auto QueuedCallback(QObjectType *object, Func &&func)
+    template<typename QObjectType, typename Func>
+    auto QueuedCallback(QObjectType *object, Func &&func, Qt::ConnectionType type = Qt::QueuedConnection)
     {
         QPointer<QObjectType> self(object);
 
-        return [self, func = std::forward<Func>(func)]<typename... T>(T &&...args) mutable
+        return [self, func = std::forward<Func>(func), type]<typename... Args>(Args &&...args) mutable
         {
-            if (self == nullptr)
+            if (!self)
             {
                 return;
             }
 
             QMetaObject::invokeMethod(
                 self,
-                [self, func, ... captured_args = std::forward<T>(args)]() mutable
+                [self, func, ... captured_args = std::forward<Args>(args)]() mutable
                 {
-                    if (self == nullptr)
+                    if (!self)
                     {
                         return;
                     }
 
                     std::invoke(func, self, std::move(captured_args)...);
                 },
-                Qt::QueuedConnection);
+                type);
         };
     }
+
+    /**
+     * Invokes a function on a Qt object on the UI thread.
+     */
+    template<typename QObjectType, typename Func, typename... Args>
+    void Invoke(QPointer<QObjectType> self, Func &&func, Args &&...args, Qt::ConnectionType type = Qt::QueuedConnection)
+    {
+        if (self == nullptr)
+        {
+            return;
+        }
+
+        QMetaObject::invokeMethod(
+            self,
+            [self, func = std::forward<Func>(func), args = std::make_tuple(std::forward<Args>(args)...)]() mutable
+            {
+                if (self == nullptr)
+                {
+                    return;
+                }
+
+                std::apply(
+                    [&](auto &&...captured_args)
+                    {
+                        std::invoke(func, std::move(captured_args)...);
+                    },
+                    std::move(args));
+            },
+            type);
+    }
+
 }

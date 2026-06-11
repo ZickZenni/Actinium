@@ -14,6 +14,7 @@ namespace Actinium
     {
         setAttribute(Qt::WA_DeleteOnClose);
         setWindowTitle(QString::fromStdString(instance->name));
+        resize(610, 666);
 
         const auto container
             = new PageContainer({new InstanceModsPage(instance, this), new InstanceSettingsPage(instance, this)}, this);

@@ -17,5 +17,9 @@ namespace Actinium
         int m_game_id;
 
         static std::optional<Mod> ParseMod(const nlohmann::json &json);
+
+        static std::optional<Submitter> ParseSubmitter(const nlohmann::json &json);
+
+        static std::optional<PreviewMedia> ParsePreviewMedia(const nlohmann::json &json);
     };
 }

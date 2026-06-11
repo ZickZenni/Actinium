@@ -148,6 +148,12 @@ target_sources(Actinium PRIVATE
         src/provider/provider.h
         src/provider/game_banana_provider.cpp
         src/provider/game_banana_provider.h
+        src/ui/model/provider/provider_mod_model.cpp
+        src/ui/model/provider/provider_mod_model.h
+        src/ui/delegate/provider/provider_mod_delegate.cpp
+        src/ui/delegate/provider/provider_mod_delegate.h
+        src/ui/icon_cache.cpp
+        src/ui/icon_cache.h
 )
 
 if (WIN32)

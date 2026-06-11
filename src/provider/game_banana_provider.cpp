@@ -75,10 +75,62 @@ namespace Actinium
 
     std::optional<Provider::Mod> GameBananaProvider::ParseMod(const nlohmann::json& json)
     {
-        JSON_REQUIRE_VAR_DEBUG(json, "_idRow", uint32_t, std::nullopt, "provider::game_banana", "Failed to parse mod")
-        JSON_REQUIRE_VAR_DEBUG(
-            json, "_sName", std::string, std::nullopt, "provider::game_banana", "Failed to parse mod")
+        constexpr auto COMPONENT = "provider::game_banana";
+        constexpr auto MESSAGE = "Failed to parse mod";
 
-        return Mod {.id = json.at("_idRow"), .name = json.at("_sName")};
+        JSON_REQUIRE_VAR_DEBUG(json, "_idRow", uint32_t, std::nullopt, COMPONENT, MESSAGE)
+        JSON_REQUIRE_VAR_DEBUG(json, "_sName", std::string, std::nullopt, COMPONENT, MESSAGE)
+        JSON_REQUIRE_VAR_DEBUG(json, "_aSubmitter", nlohmann::json::object_t, std::nullopt, COMPONENT, MESSAGE)
+        JSON_REQUIRE_VAR_DEBUG(json, "_aPreviewMedia", nlohmann::json::object_t, std::nullopt, COMPONENT, MESSAGE)
+
+        const auto& json_preview_media = json.at("_aPreviewMedia");
+
+        JSON_REQUIRE_VAR_DEBUG(json_preview_media, "_aImages", nlohmann::json::array_t, std::nullopt, COMPONENT, MESSAGE)
+
+        const auto submitter = ParseSubmitter(json.at("_aSubmitter"));
+
+        if (!submitter.has_value())
+        {
+            return std::nullopt;
+        }
+
+        Mod mod{};
+        mod.id = json.at("_idRow");
+        mod.name = json.at("_sName");
+        mod.submitter = submitter.value();
+
+        for (const auto& image : json_preview_media.at("_aImages"))
+        {
+            const auto preview_media = ParsePreviewMedia(image);
+
+            if (preview_media.has_value())
+            {
+                mod.preview_media.push_back(preview_media.value());
+            }
+        }
+
+        return mod;
+    }
+
+    std::optional<Provider::Submitter> GameBananaProvider::ParseSubmitter(const nlohmann::json& json)
+    {
+        JSON_REQUIRE_VAR_DEBUG(
+            json, "_idRow", uint32_t, std::nullopt, "provider::game_banana", "Failed to parse submitter")
+        JSON_REQUIRE_VAR_DEBUG(
+            json, "_sName", std::string, std::nullopt, "provider::game_banana", "Failed to parse submitter")
+
+        return Submitter {.id = json.at("_idRow"), .name = json.at("_sName")};
+    }
+
+    std::optional<Provider::PreviewMedia> GameBananaProvider::ParsePreviewMedia(const nlohmann::json& json)
+    {
+        JSON_REQUIRE_VAR_DEBUG(
+            json, "_sType", std::string, std::nullopt, "provider::game_banana", "Failed to parse preview media")
+        JSON_REQUIRE_VAR_DEBUG(
+            json, "_sBaseUrl", std::string, std::nullopt, "provider::game_banana", "Failed to parse preview media")
+        JSON_REQUIRE_VAR_DEBUG(
+            json, "_sFile", std::string, std::nullopt, "provider::game_banana", "Failed to parse preview media")
+
+        return PreviewMedia {.type = json.at("_sType"), .base_url = json.at("_sBaseUrl"), .file = json.at("_sFile")};
     }
 }
