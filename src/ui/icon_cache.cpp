@@ -28,7 +28,7 @@ namespace Actinium
 
         if (std::filesystem::exists(icon_path))
         {
-            QIcon icon(icon_path.c_str());
+            QIcon icon(icon_path.string().c_str());
 
             if (!icon.isNull())
             {
@@ -119,7 +119,7 @@ namespace Actinium
                     return;
                 }
 
-                QSaveFile file(file_path);
+                QSaveFile file(file_path.string().c_str());
 
                 if (file.open(QIODevice::WriteOnly))
                 {
