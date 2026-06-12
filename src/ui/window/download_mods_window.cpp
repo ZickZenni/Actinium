@@ -5,6 +5,7 @@
 #include "ui/delegate/provider/provider_mod_delegate.h"
 #include "util/lib/qt.h"
 
+#include <QHBoxLayout>
 #include <QListView>
 
 namespace Actinium
@@ -21,6 +22,8 @@ namespace Actinium
 
         const auto delegate = new ProviderModDelegate(this);
 
+        const auto layout = new QHBoxLayout();
+
         m_view = new QListView(this);
         m_view->setObjectName("ModsListView");
         m_view->setModel(m_model);
@@ -31,6 +34,18 @@ namespace Actinium
         m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         m_view->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
+        connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &DownloadModsWindow::OnSelectionChanged);
+
+        m_mod_description = new QTextBrowser(this);
+        m_mod_description->setObjectName("ModDescription");
+        m_mod_description->setReadOnly(true);
+        m_mod_description->setOpenExternalLinks(true);
+
+        layout->addWidget(m_view);
+        layout->addWidget(m_mod_description);
+        layout->setContentsMargins(0, 0, 0, 0);
+
         const auto& providers = m_instance->GetGame()->providers;
 
         if (!providers.empty())
@@ -38,12 +53,36 @@ namespace Actinium
             providers.at(0)->GetMods(QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
         }
 
-        setCentralWidget(m_view);
+        const auto central_widget = new QWidget(this);
+        central_widget->setLayout(layout);
+        setCentralWidget(central_widget);
     }
 
     DownloadModsWindow::~DownloadModsWindow()
     {
         Logger::Debug("ui::download_mods_window", "Destructor called");
+    }
+
+    void DownloadModsWindow::OnSelectionChanged(
+        const QItemSelection& selected, [[maybe_unused]] const QItemSelection& deselected)
+    {
+        const auto selected_indexes = selected.indexes();
+
+        if (selected_indexes.size() == 0)
+        {
+            m_mod_description->setPlainText("");
+            return;
+        }
+
+        const auto selected_index = selected_indexes.at(0);
+        const auto mod_id = static_cast<uint32_t>(selected_index.internalId());
+
+        m_instance->GetGame()->providers.at(0)->GetMod(mod_id,
+            QT::QueuedCallback(this,
+                [](const DownloadModsWindow* self, const Provider::ModInfo& mod_info)
+                {
+                    self->m_mod_description->setHtml(QString::fromStdString(mod_info.description));
+                }));
     }
 
     void DownloadModsWindow::OnSearchResponse(DownloadModsWindow* self, const Provider::SearchResponse& response)

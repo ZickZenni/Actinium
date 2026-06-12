@@ -16,6 +16,16 @@ namespace Actinium
         endResetModel();
     }
 
+    QModelIndex ProviderModModel::index(const int row, const int column, const QModelIndex& parent) const
+    {
+        if (parent.isValid() || !m_search_response.has_value())
+        {
+            return {};
+        }
+
+        return createIndex(row, column, m_search_response.value().mods.at(row).id);
+    }
+
     int ProviderModModel::rowCount(const QModelIndex& parent) const
     {
         if (parent.isValid() || !m_search_response.has_value())

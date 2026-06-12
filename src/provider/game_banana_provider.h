@@ -13,6 +13,8 @@ namespace Actinium
 
         void GetMods(ResponseCallback<SearchResponse> callback) override;
 
+        void GetMod(uint32_t mod_id, ResponseCallback<ModInfo> callback) override;
+
     private:
         int m_game_id;
 

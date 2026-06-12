@@ -5,6 +5,7 @@
 #include "ui/model/provider/provider_mod_model.h"
 
 #include <QListView>
+#include <QTextBrowser>
 
 namespace Actinium
 {
@@ -20,6 +21,9 @@ namespace Actinium
         Instance *m_instance;
         ProviderModModel *m_model;
         QListView *m_view;
+        QTextBrowser *m_mod_description;
+
+        void OnSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
         static void OnSearchResponse(DownloadModsWindow *self, const Provider::SearchResponse &response);
     };

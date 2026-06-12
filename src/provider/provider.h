@@ -31,6 +31,11 @@ namespace Actinium
             std::vector<PreviewMedia> preview_media;
         };
 
+        struct ModInfo : public Mod
+        {
+            std::string description;
+        };
+
         struct SearchResponse
         {
             uint32_t total_count;
@@ -42,5 +47,7 @@ namespace Actinium
         virtual ~Provider() = default;
 
         virtual void GetMods(ResponseCallback<SearchResponse> callback) = 0;
+
+        virtual void GetMod(uint32_t mod_id, ResponseCallback<ModInfo> callback) = 0;
     };
 }

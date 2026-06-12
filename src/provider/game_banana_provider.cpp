@@ -8,7 +8,7 @@
 
 namespace Actinium
 {
-    constexpr std::string_view BASE_API_URL = "https://gamebanana.com/apiv11";
+    constexpr std::string_view BASE_API_URL = "https://gamebanana.com/apiv12";
 
     GameBananaProvider::GameBananaProvider(const int game_id)
         : m_game_id(game_id)
@@ -73,6 +73,69 @@ namespace Actinium
         cpr::GetCallback(cpr_callback, cpr::Url {url});
     }
 
+    void GameBananaProvider::GetMod(uint32_t mod_id, ResponseCallback<ModInfo> callback)
+    {
+        const auto url = std::format("{}/Mod/{}/ProfilePage", BASE_API_URL, mod_id);
+
+        Logger::Debug("provider::game_provider", "Sending API request (game_id={}, url={})", m_game_id, url);
+
+        auto cpr_callback = [callback](const cpr::Response& response)
+        {
+            if (response.status_code != 200)
+            {
+                Logger::Error("provider::game_provider", "Failed to get mods (status_code={})", response.status_code);
+                callback({});
+                return;
+            }
+
+            if (response.text.empty())
+            {
+                Logger::Error("provider::game_provider", "Received an empty response from request");
+                callback({});
+                return;
+            }
+
+            const auto json = nlohmann::json::parse(response.text, nullptr, false);
+
+            if (json.is_discarded())
+            {
+                Logger::Error("provider::game_provider", "Received an invalid json response from request (data={})",
+                    response.text);
+                callback({});
+                return;
+            }
+
+            JSON_CHECK_INVALID_VAR(json, "_sText", std::string)
+            {
+                Logger::Error("provider::game_provider", "Received an invalid json response from request (data={})",
+                    response.text);
+                callback({});
+                return;
+            }
+
+            const auto parsed_mod = ParseMod(json);
+
+            if (!parsed_mod.has_value())
+            {
+                callback({});
+                return;
+            }
+
+            const auto& value = parsed_mod.value();
+
+            ModInfo mod_info {};
+            mod_info.id = value.id;
+            mod_info.name = value.name;
+            mod_info.submitter = value.submitter;
+            mod_info.preview_media = value.preview_media;
+            mod_info.description = json.at("_sText");
+
+            callback(mod_info);
+        };
+
+        cpr::GetCallback(cpr_callback, cpr::Url {url});
+    }
+
     std::optional<Provider::Mod> GameBananaProvider::ParseMod(const nlohmann::json& json)
     {
         constexpr auto COMPONENT = "provider::game_banana";
@@ -85,7 +148,8 @@ namespace Actinium
 
         const auto& json_preview_media = json.at("_aPreviewMedia");
 
-        JSON_REQUIRE_VAR_DEBUG(json_preview_media, "_aImages", nlohmann::json::array_t, std::nullopt, COMPONENT, MESSAGE)
+        JSON_REQUIRE_VAR_DEBUG(
+            json_preview_media, "_aImages", nlohmann::json::array_t, std::nullopt, COMPONENT, MESSAGE)
 
         const auto submitter = ParseSubmitter(json.at("_aSubmitter"));
 
@@ -94,7 +158,7 @@ namespace Actinium
             return std::nullopt;
         }
 
-        Mod mod{};
+        Mod mod {};
         mod.id = json.at("_idRow");
         mod.name = json.at("_sName");
         mod.submitter = submitter.value();
