@@ -36,5 +36,10 @@ namespace Actinium
          * Downloads the icon to the disk.
          */
         void DownloadIcon(const std::string &url, const std::filesystem::path &file_path);
+
+        /**
+         * Loads the icon from the disk correctly (prevents only having 24x24 size)
+         */
+        static QIcon LoadIcon(const std::filesystem::path &path);
     };
 }

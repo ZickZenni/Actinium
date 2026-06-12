@@ -1,6 +1,8 @@
 #include "icon_cache.h"
 
 #include "core/logger.h"
+#include "util/fs/path.h"
+#include "util/fs/temp_file.h"
 #include "util/lib/qt.h"
 
 #include <QCryptographicHash>
@@ -28,7 +30,7 @@ namespace Actinium
 
         if (std::filesystem::exists(icon_path))
         {
-            QIcon icon(icon_path.string().c_str());
+            QIcon icon = LoadIcon(icon_path);
 
             if (!icon.isNull())
             {
@@ -42,6 +44,7 @@ namespace Actinium
 
         return GetPlaceholderIcon();
     }
+
     QIcon IconCache::GetPlaceholderIcon()
     {
         static const auto placeholder_icon = QIcon("./resources/instances/test.png");
@@ -69,10 +72,25 @@ namespace Actinium
         QThreadPool::globalInstance()->start(
             [self, url, file_path]
             {
+                const TempFile temp_file(Path::CreateTempFilePath());
+                std::ofstream out(temp_file.GetPath(), std::ios::binary);
+
+                if (!out)
+                {
+                    QT::Invoke(self,
+                        [url, self]()
+                        {
+                            self->m_pending.erase(url);
+                        });
+
+                    return;
+                }
+
                 Logger::Info("ui::icon_cache::download_icon", "Begin download for icon (url={}, path={})", url,
                     file_path.string());
 
-                const auto response = cpr::Get(cpr::Url {url}, cpr::Redirect {true}, cpr::Timeout {10000});
+                const auto response = cpr::Download(out, cpr::Url {url}, cpr::Redirect {true}, cpr::Timeout {10000});
+                out.close();
 
                 Logger::Info("ui::icon_cache::download_icon", "Download finished (url={}, path={}, status_code={})",
                     url, file_path.string(), response.status_code);
@@ -104,45 +122,30 @@ namespace Actinium
                     return;
                 }
 
-                const QByteArray data(response.text.data(), static_cast<int>(response.text.size()));
+                std::filesystem::copy_file(temp_file.GetPath(), file_path);
 
-                QPixmap pixmap;
-
-                if (!pixmap.loadFromData(data))
-                {
-                    QT::Invoke(self,
-                        [url, self]()
-                        {
-                            self->m_pending.erase(url);
-                        });
-
-                    return;
-                }
-
-                QSaveFile file(file_path.string().c_str());
-
-                if (file.open(QIODevice::WriteOnly))
-                {
-                    file.write(data);
-                    file.commit();
-
-                    Logger::Debug(
-                        "ui::icon_cache::download_icon", "Saved icon (url={}, path={})", url, file_path.string());
-                }
-                else
-                {
-                    Logger::Error("ui::icon_cache::download_icon", "Failed to save icon (url={}, path={})", url,
-                        file_path.string());
-                }
+                Logger::Debug("ui::icon_cache::download_icon", "Saved icon (url={}, path={})", url, file_path.string());
 
                 QT::Invoke(self,
-                    [url, self, pixmap]()
+                    [url, self, file_path]()
                     {
                         self->m_pending.erase(url);
 
-                        QIcon icon(pixmap);
+                        QIcon icon = LoadIcon(file_path);
                         self->m_icons.insert({url, icon});
                     });
             });
+    }
+
+    QIcon IconCache::LoadIcon(const std::filesystem::path& path)
+    {
+        const QPixmap pixmap(path.string().c_str());
+
+        if (pixmap.isNull())
+        {
+            return {};
+        }
+
+        return QIcon(pixmap);
     }
 }
