@@ -11,7 +11,8 @@ namespace Actinium
     constexpr auto ITEM_HEIGHT = 60;
     constexpr auto ICON_ASPECT_RATIO = 16.0f / 9.0f;
     constexpr auto ICON_MARGIN = 4;
-    constexpr auto TEXT_MARGIN_LEFT = 6;
+    constexpr auto TEXT_MARGIN_LEFT = 5;
+    constexpr auto NAME_MARGIN_TOP = 7;
 
     ProviderModDelegate::ProviderModDelegate(QObject* parent)
         : QStyledItemDelegate(parent)
@@ -23,10 +24,6 @@ namespace Actinium
     {
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
-
-        opt.text = index.data(Qt::DisplayRole).toString();
-        opt.textElideMode = Qt::ElideRight;
-        opt.displayAlignment = Qt::AlignVCenter | Qt::AlignLeft;
 
         painter->save();
         painter->setClipRect(opt.rect);
@@ -50,9 +47,11 @@ namespace Actinium
         }
 
         const auto style = QT::GetCorrectStyle(opt);
-        style->drawItemText(painter,
-            opt.rect.adjusted(icon_width + TEXT_MARGIN_LEFT, 0, icon_width + TEXT_MARGIN_LEFT, 0),
-            Qt::AlignVCenter | Qt::AlignLeft, opt.palette, true, opt.text);
+        const auto text_rect = opt.rect.adjusted(
+            icon_width + TEXT_MARGIN_LEFT, NAME_MARGIN_TOP, icon_width + TEXT_MARGIN_LEFT, NAME_MARGIN_TOP);
+
+        style->drawItemText(painter, text_rect, Qt::AlignTop | Qt::AlignLeft, opt.palette, true,
+            index.data(Qt::DisplayRole).toString());
 
         painter->restore();
     }
