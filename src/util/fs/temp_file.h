@@ -15,7 +15,7 @@ namespace Actinium
 
         ~TempFile()
         {
-            if (!m_path.empty())
+            if (!m_path.empty() && std::filesystem::exists(m_path))
             {
                 std::filesystem::remove(m_path);
             }
