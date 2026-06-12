@@ -36,6 +36,13 @@ namespace Actinium::QT
     std::vector<std::string> ToStdVector(const QStringList &list);
 
     /**
+     * Paints the icon, covering the area that it should be in.
+     *
+     * Best works while also using `QPainter::setClipRect` before with the specified area.
+     */
+    void PaintIconCoveredInArea(QPainter* painter, const QIcon & icon, const QRect& area);
+
+    /**
      * Creates a thread-safe callback function for QT objects.
      */
     template<typename QObjectType, typename Func>

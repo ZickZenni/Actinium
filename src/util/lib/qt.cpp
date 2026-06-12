@@ -1,6 +1,7 @@
 #include "qt.h"
 
 #include <QApplication>
+#include <QPainter>
 
 namespace Actinium::QT
 {
@@ -23,7 +24,7 @@ namespace Actinium::QT
         ViewItemTextLayout(text_layout, bounds.width(), height, used_width);
 
         const auto size = QSize(qCeil(used_width), qCeil(height));
-        return { size.width() + 2 * text_margin, size.height() };
+        return {size.width() + 2 * text_margin, size.height()};
     }
 
     void ViewItemTextLayout(QTextLayout& layout, const int lineWidth, qreal& height, qreal& used_width)
@@ -77,5 +78,21 @@ namespace Actinium::QT
         }
 
         return result;
+    }
+
+    void PaintIconCoveredInArea(QPainter* painter, const QIcon& icon, const QRect& area)
+    {
+        const auto dpr = painter->device()->devicePixelRatioF();
+        const auto target_size = area.size() * dpr;
+
+        auto pixmap = icon.pixmap(target_size);
+        pixmap.setDevicePixelRatio(dpr);
+
+        const auto scaled = pixmap.scaled(area.size() * dpr, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        const auto diff_width = scaled.width() - target_size.width();
+        const auto diff_height = scaled.height() - target_size.height();
+        const auto source_rect = QRect(QPoint(diff_width / 2, diff_height / 2), target_size);
+
+        painter->drawPixmap(area, scaled, source_rect);
     }
 }
