@@ -130,6 +130,36 @@ namespace Actinium
             mod_info.preview_media = value.preview_media;
             mod_info.description = json.at("_sText");
 
+            JSON_CHECK_INVALID_VAR(json, "_aFiles", nlohmann::json::array_t)
+            {
+                callback({});
+                return;
+            }
+
+            const auto& files = json.at("_aFiles");
+
+            for (const auto& json_file : files)
+            {
+                JSON_CHECK_INVALID_VAR(json_file, "_idRow", uint32_t)
+                {
+                    continue;
+                }
+
+                const auto& file_id = json_file.at("_idRow").get<uint32_t>();
+
+                JSON_CHECK_INVALID_VAR(json_file, "_sFile", std::string)
+                {
+                    continue;
+                }
+
+                File file;
+                file.id = file_id;
+                file.url = std::format("https://gamebanana.com/dl/{}", file_id);
+                file.name = json_file.at("_sFile");
+
+                mod_info.files.push_back(file);
+            }
+
             callback(mod_info);
         };
 

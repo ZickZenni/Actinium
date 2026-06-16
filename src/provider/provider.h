@@ -31,9 +31,17 @@ namespace Actinium
             std::vector<PreviewMedia> preview_media;
         };
 
-        struct ModInfo : public Mod
+        struct File
+        {
+            uint32_t id;
+            std::string name;
+            std::string url;
+        };
+
+        struct ModInfo : Mod
         {
             std::string description;
+            std::vector<File> files;
         };
 
         struct SearchResponse

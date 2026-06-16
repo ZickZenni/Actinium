@@ -22,6 +22,7 @@ namespace Actinium
 
         const auto delegate = new ProviderModDelegate(this);
 
+        const auto main_layout = new QVBoxLayout();
         const auto layout = new QHBoxLayout();
 
         m_view = new QListView(this);
@@ -42,9 +43,17 @@ namespace Actinium
         m_mod_description->setReadOnly(true);
         m_mod_description->setOpenExternalLinks(true);
 
+        m_mod_file_selector = new QComboBox(this);
+        m_mod_file_selector->setObjectName("ModFileSelector");
+        m_mod_file_selector->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
         layout->addWidget(m_view);
         layout->addWidget(m_mod_description);
         layout->setContentsMargins(0, 0, 0, 0);
+
+        main_layout->addLayout(layout);
+        main_layout->addWidget(m_mod_file_selector, 0, Qt::AlignmentFlag::AlignRight | Qt::AlignmentFlag::AlignVCenter);
+        main_layout->setContentsMargins(0, 0, 0, 0);
 
         const auto& providers = m_instance->GetGame()->providers;
 
@@ -54,7 +63,7 @@ namespace Actinium
         }
 
         const auto central_widget = new QWidget(this);
-        central_widget->setLayout(layout);
+        central_widget->setLayout(main_layout);
         setCentralWidget(central_widget);
     }
 
@@ -82,6 +91,12 @@ namespace Actinium
                 [](const DownloadModsWindow* self, const Provider::ModInfo& mod_info)
                 {
                     self->m_mod_description->setHtml(QString::fromStdString(mod_info.description));
+                    self->m_mod_file_selector->clear();
+
+                    for (const auto& file : mod_info.files)
+                    {
+                        self->m_mod_file_selector->addItem(QString::fromStdString(file.name));
+                    }
                 }));
     }
 

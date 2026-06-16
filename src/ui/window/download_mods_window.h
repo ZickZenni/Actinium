@@ -4,6 +4,7 @@
 #include "instance/instance.h"
 #include "ui/model/provider/provider_mod_model.h"
 
+#include <QComboBox>
 #include <QListView>
 #include <QTextBrowser>
 
@@ -22,6 +23,7 @@ namespace Actinium
         ProviderModModel *m_model;
         QListView *m_view;
         QTextBrowser *m_mod_description;
+        QComboBox* m_mod_file_selector;
 
         void OnSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
