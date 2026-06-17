@@ -11,7 +11,7 @@ namespace Actinium
     public:
         explicit GameBananaProvider(int game_id);
 
-        void GetMods(uint16_t page, ResponseCallback<SearchResponse> callback) override;
+        void GetMods(const std::string& query, uint16_t page, ResponseCallback<SearchResponse> callback) override;
 
         void GetMod(uint32_t mod_id, ResponseCallback<ModInfo> callback) override;
 

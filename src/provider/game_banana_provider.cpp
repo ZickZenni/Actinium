@@ -15,9 +15,15 @@ namespace Actinium
     {
     }
 
-    void GameBananaProvider::GetMods(uint16_t page, ResponseCallback<SearchResponse> callback)
+    void GameBananaProvider::GetMods(const std::string& query, uint16_t page, ResponseCallback<SearchResponse> callback)
     {
-        const auto url = std::format("{}/Game/{}/Subfeed?_csvModelInclusions=Mod&_nPage={}", BASE_API_URL, m_game_id, page + 1);
+        auto url = std::format(
+            "{}/Game/{}/Subfeed?_csvModelInclusions=Mod&_nPage={}", BASE_API_URL, m_game_id, page + 1);
+
+        if (!query.empty())
+        {
+            url += "&_sName=" + query;
+        }
 
         Logger::Debug("provider::game_provider", "Sending API request (game_id={}, url={})", m_game_id, url);
 

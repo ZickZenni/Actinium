@@ -6,6 +6,7 @@
 #include "util/lib/qt.h"
 
 #include <QHBoxLayout>
+#include <QLineEdit>
 #include <QListView>
 #include <QScrollBar>
 #include <QTimer>
@@ -56,6 +57,17 @@ namespace Actinium
         layout->addWidget(m_mod_description);
         layout->setContentsMargins(0, 0, 0, 0);
 
+        m_search_field = new QLineEdit();
+        m_search_field->setObjectName("SearchField");
+
+        m_search_field_timer = new QTimer(this);
+        m_search_field_timer->setObjectName("SearchFieldTimer");
+        m_search_field_timer->setSingleShot(true);
+
+        connect(m_search_field, &QLineEdit::textChanged, this, &DownloadModsWindow::OnSearchFieldChanged);
+        connect(m_search_field_timer, &QTimer::timeout, this, &DownloadModsWindow::OnSearchFieldTimerTimeout);
+
+        main_layout->addWidget(m_search_field, 0, Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
         main_layout->addLayout(layout);
         main_layout->addWidget(m_mod_file_selector, 0, Qt::AlignmentFlag::AlignRight | Qt::AlignmentFlag::AlignVCenter);
         main_layout->setContentsMargins(0, 0, 0, 0);
@@ -117,6 +129,22 @@ namespace Actinium
         }
     }
 
+    void DownloadModsWindow::OnSearchFieldChanged([[maybe_unused]] const QString& text) const
+    {
+        m_search_field_timer->start(300);
+    }
+
+    void DownloadModsWindow::OnSearchFieldTimerTimeout()
+    {
+        m_ready_to_scroll_search = true;
+        m_end_of_list = false;
+        m_waiting_for_response = false;
+        m_current_page = 0;
+        m_model->ClearResponse();
+
+        Search();
+    }
+
     void DownloadModsWindow::Search()
     {
         if (m_waiting_for_response || m_end_of_list || !m_ready_to_scroll_search)
@@ -125,7 +153,7 @@ namespace Actinium
         }
 
         m_waiting_for_response = true;
-        m_current_provider->GetMods(m_current_page, QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
+        m_current_provider->GetMods(qstr(m_search_field->text()), m_current_page, QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
     }
 
     void DownloadModsWindow::OnSearchResponse(DownloadModsWindow* self, const Provider::SearchResponse& response)

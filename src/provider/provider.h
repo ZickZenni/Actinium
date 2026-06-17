@@ -54,7 +54,7 @@ namespace Actinium
 
         virtual ~Provider() = default;
 
-        virtual void GetMods(uint16_t page, ResponseCallback<SearchResponse> callback) = 0;
+        virtual void GetMods(const std::string& query, uint16_t page, ResponseCallback<SearchResponse> callback) = 0;
 
         virtual void GetMod(uint32_t mod_id, ResponseCallback<ModInfo> callback) = 0;
     };

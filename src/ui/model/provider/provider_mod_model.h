@@ -13,6 +13,8 @@ namespace Actinium
 
         void SetResponse(const Provider::SearchResponse& response);
 
+        void ClearResponse();
+
         QModelIndex index(int row, int column, const QModelIndex& parent) const override;
 
         [[nodiscard]] int rowCount(const QModelIndex &parent) const override;

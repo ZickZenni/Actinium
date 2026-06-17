@@ -54,6 +54,13 @@ namespace Actinium
         endResetModel();
     }
 
+    void ProviderModModel::ClearResponse()
+    {
+        beginResetModel();
+        m_search_response.reset();
+        endResetModel();
+    }
+
     QModelIndex ProviderModModel::index(const int row, const int column, const QModelIndex& parent) const
     {
         if (parent.isValid() || !m_search_response.has_value())
