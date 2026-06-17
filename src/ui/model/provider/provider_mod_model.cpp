@@ -41,7 +41,16 @@ namespace Actinium
     void ProviderModModel::SetResponse(const Provider::SearchResponse& response)
     {
         beginResetModel();
-        m_search_response = response;
+
+        if (m_search_response.has_value())
+        {
+            m_search_response.value().mods.insert(m_search_response.value().mods.end(), response.mods.begin(), response.mods.end());
+        }
+        else
+        {
+            m_search_response = response;
+        }
+
         endResetModel();
     }
 

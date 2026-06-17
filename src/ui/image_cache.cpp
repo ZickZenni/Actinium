@@ -114,15 +114,36 @@ namespace Actinium
                     return;
                 }
 
-                std::filesystem::copy_file(temp_file.GetPath(), file_path);
+                std::error_code copy_error_code;
+                std::filesystem::copy_file(temp_file.GetPath(), file_path, copy_error_code);
 
-                Logger::Debug("ui::image_cache::download_image", "Saved image (url={}, path={})", url, file_path.string());
+                if (copy_error_code)
+                {
+                    Logger::Error("ui::image_cache::download_image", "Failed to save image (url={}, path={}, error={})",
+                        url, file_path.string(), copy_error_code.message());
+
+                    return;
+                }
+
+                Logger::Debug(
+                    "ui::image_cache::download_image", "Saved image (url={}, path={})", url, file_path.string());
 
                 QT::Invoke(self,
                     [url, self, file_path]()
                     {
+                        const auto image = LoadImage(file_path);
+
+                        if (image.isNull())
+                        {
+                            self->m_pending.erase(url);
+
+                            Logger::Error("ui::image_cache::download_image", "Failed to load image (url={}, path={})",
+                                url, file_path.string());
+                            return;
+                        }
+
+                        self->m_images.insert({url, image});
                         self->m_pending.erase(url);
-                        self->m_images.insert({url, LoadImage(file_path)});
                         self->emit OnDownloadFinished(url);
                     });
             });

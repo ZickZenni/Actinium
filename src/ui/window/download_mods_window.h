@@ -24,8 +24,17 @@ namespace Actinium
         QListView *m_view;
         QTextBrowser *m_mod_description;
         QComboBox* m_mod_file_selector;
+        Provider* m_current_provider;
+        uint16_t m_current_page;
+        bool m_waiting_for_response;
+        bool m_end_of_list;
+        bool m_ready_to_scroll_search;
 
         void OnSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+
+        void OnScrollBarChanged(int value);
+
+        void Search();
 
         static void OnSearchResponse(DownloadModsWindow *self, const Provider::SearchResponse &response);
     };

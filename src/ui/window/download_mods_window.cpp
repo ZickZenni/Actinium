@@ -7,12 +7,16 @@
 
 #include <QHBoxLayout>
 #include <QListView>
+#include <QScrollBar>
+#include <QTimer>
 
 namespace Actinium
 {
     DownloadModsWindow::DownloadModsWindow(Instance* instance, QWidget* parent)
         : BaseWindow(parent)
         , m_instance(instance)
+        , m_current_page(0)
+        , m_ready_to_scroll_search(true)
     {
         setObjectName("DownloadModsWindow");
         setWindowTitle("Download Mods");
@@ -35,6 +39,7 @@ namespace Actinium
         m_view->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         m_view->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
+        connect(m_view->verticalScrollBar(), &QScrollBar::valueChanged, this, &DownloadModsWindow::OnScrollBarChanged);
         connect(m_view->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             &DownloadModsWindow::OnSelectionChanged);
 
@@ -59,7 +64,8 @@ namespace Actinium
 
         if (!providers.empty())
         {
-            providers.at(0)->GetMods(QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
+            m_current_provider = providers.at(0);
+            Search();
         }
 
         const auto central_widget = new QWidget(this);
@@ -86,7 +92,7 @@ namespace Actinium
         const auto selected_index = selected_indexes.at(0);
         const auto mod_id = static_cast<uint32_t>(selected_index.internalId());
 
-        m_instance->GetGame()->providers.at(0)->GetMod(mod_id,
+        m_current_provider->GetMod(mod_id,
             QT::QueuedCallback(this,
                 [](const DownloadModsWindow* self, const Provider::ModInfo& mod_info)
                 {
@@ -100,12 +106,47 @@ namespace Actinium
                 }));
     }
 
+    void DownloadModsWindow::OnScrollBarChanged(const int value)
+    {
+        const auto maximum = m_view->verticalScrollBar()->maximum();
+
+        if (maximum - value <= 10)
+        {
+            m_current_page += 1;
+            Search();
+        }
+    }
+
+    void DownloadModsWindow::Search()
+    {
+        if (m_waiting_for_response || m_end_of_list || !m_ready_to_scroll_search)
+        {
+            return;
+        }
+
+        m_waiting_for_response = true;
+        m_current_provider->GetMods(m_current_page, QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
+    }
+
     void DownloadModsWindow::OnSearchResponse(DownloadModsWindow* self, const Provider::SearchResponse& response)
     {
         Logger::Debug("ui::download_mods_window", "Received search response (total_count={}, entries_count={})",
             response.total_count, response.mods.size());
 
         self->m_model->SetResponse(response);
+        self->m_ready_to_scroll_search = true;
+        self->m_waiting_for_response = false;
+
+        QTimer::singleShot(200, self,
+            [self]
+            {
+                self->m_ready_to_scroll_search = true;
+            });
+
+        if (response.mods.empty())
+        {
+            self->m_end_of_list = true;
+        }
     }
 }
 // ReSharper restore CppDFAMemoryLeak
