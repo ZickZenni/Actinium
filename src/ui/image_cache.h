@@ -9,6 +9,8 @@ namespace Actinium
 {
     class ImageCache : public QWidget
     {
+        Q_OBJECT
+
     public:
         explicit ImageCache(const std::filesystem::path &cache_path);
 
@@ -16,6 +18,9 @@ namespace Actinium
          * Retrieves an icon from the url.
          */
         QImage GetImageFromUrl(const std::string &url);
+
+    signals:
+        void OnDownloadFinished(const std::string &url);
 
     private:
         std::filesystem::path m_cache_path;

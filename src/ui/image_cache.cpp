@@ -123,6 +123,7 @@ namespace Actinium
                     {
                         self->m_pending.erase(url);
                         self->m_images.insert({url, LoadImage(file_path)});
+                        self->emit OnDownloadFinished(url);
                     });
             });
     }
