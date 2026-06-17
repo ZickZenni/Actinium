@@ -41,14 +41,7 @@ namespace Actinium
 
         DownloadImage(url, image_path);
 
-        return GetPlaceholderImage();
-    }
-
-    QImage ImageCache::GetPlaceholderImage()
-    {
-        static const auto placeholder_image = QImage("./resources/instances/test.png");
-
-        return placeholder_image;
+        return {};
     }
 
     std::filesystem::path ImageCache::GetImagePathFromUrl(const std::string& url) const

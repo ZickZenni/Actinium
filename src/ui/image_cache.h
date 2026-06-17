@@ -17,11 +17,6 @@ namespace Actinium
          */
         QImage GetImageFromUrl(const std::string &url);
 
-        /**
-         * Retrieves the placeholder icon.
-         */
-        static QImage GetPlaceholderImage();
-
     private:
         std::filesystem::path m_cache_path;
         std::unordered_map<std::string, QImage> m_images;
