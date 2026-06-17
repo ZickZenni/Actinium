@@ -152,8 +152,8 @@ target_sources(Actinium PRIVATE
         src/ui/model/provider/provider_mod_model.h
         src/ui/delegate/provider/provider_mod_delegate.cpp
         src/ui/delegate/provider/provider_mod_delegate.h
-        src/ui/icon_cache.cpp
-        src/ui/icon_cache.h
+        src/ui/image_cache.cpp
+        src/ui/image_cache.h
 )
 
 if (WIN32)

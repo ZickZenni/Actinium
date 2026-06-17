@@ -106,7 +106,7 @@ namespace Actinium
         : QApplication(argc, argv)
         , m_file_watcher(new efsw::FileWatcher())
         , m_main_window(nullptr)
-        , m_icon_cache(nullptr)
+        , m_image_cache(nullptr)
     {
         setStyle(QStyleFactory::create("Fusion"));
         setOrganizationName("ZickZenni");
@@ -117,7 +117,7 @@ namespace Actinium
 
         Logger::Info("app::startup", "Storage directory is located on {}", GetAppDataPath().string());
 
-        m_icon_cache = new IconCache(GetAppDataPath() / "cache" / "icons");
+        m_image_cache = new ImageCache(GetAppDataPath() / "cache" / "images");
 
         LoadConfig();
 
@@ -368,9 +368,9 @@ namespace Actinium
         return m_config.game_executables.at(game_id);
     }
 
-    IconCache* Application::GetIconCache() const
+    ImageCache* Application::GetImageCache() const
     {
-        return m_icon_cache;
+        return m_image_cache;
     }
 
     std::filesystem::path Application::GetAppDataPath()

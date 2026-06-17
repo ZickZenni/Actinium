@@ -1,4 +1,4 @@
-#include "icon_cache.h"
+#include "image_cache.h"
 
 #include "core/logger.h"
 #include "util/fs/path.h"
@@ -12,54 +12,53 @@
 
 namespace Actinium
 {
-    IconCache::IconCache(const std::filesystem::path& cache_path)
+    ImageCache::ImageCache(const std::filesystem::path& cache_path)
         : m_cache_path(cache_path)
     {
         std::filesystem::create_directories(m_cache_path);
     }
 
-    QIcon IconCache::GetIconFromUrl(const std::string& url)
+    QImage ImageCache::GetImageFromUrl(const std::string& url)
     {
-
-        if (m_icons.contains(url))
+        if (m_images.contains(url))
         {
-            return m_icons.at(url);
+            return m_images.at(url);
         }
 
-        const auto icon_path = GetIconPathFromUrl(url);
+        const auto image_path = GetImagePathFromUrl(url);
 
-        if (std::filesystem::exists(icon_path))
+        if (std::filesystem::exists(image_path))
         {
-            QIcon icon = LoadIcon(icon_path);
+            const auto image = LoadImage(image_path);
 
-            if (!icon.isNull())
+            if (!image.isNull())
             {
-                m_icons.insert({url, icon});
+                m_images.insert({url, image});
 
-                return icon;
+                return image;
             }
         }
 
-        DownloadIcon(url, icon_path);
+        DownloadImage(url, image_path);
 
-        return GetPlaceholderIcon();
+        return GetPlaceholderImage();
     }
 
-    QIcon IconCache::GetPlaceholderIcon()
+    QImage ImageCache::GetPlaceholderImage()
     {
-        static const auto placeholder_icon = QIcon("./resources/instances/test.png");
+        static const auto placeholder_image = QImage("./resources/instances/test.png");
 
-        return placeholder_icon;
+        return placeholder_image;
     }
 
-    std::filesystem::path IconCache::GetIconPathFromUrl(const std::string& url) const
+    std::filesystem::path ImageCache::GetImagePathFromUrl(const std::string& url) const
     {
         const auto hash = QCryptographicHash::hash(url, QCryptographicHash::Sha256).toHex();
 
         return m_cache_path / hash.toStdString();
     }
 
-    void IconCache::DownloadIcon(const std::string& url, const std::filesystem::path& file_path)
+    void ImageCache::DownloadImage(const std::string& url, const std::filesystem::path& file_path)
     {
         if (m_pending.contains(url))
         {
@@ -86,13 +85,13 @@ namespace Actinium
                     return;
                 }
 
-                Logger::Info("ui::icon_cache::download_icon", "Begin download for icon (url={}, path={})", url,
+                Logger::Info("ui::image_cache::download_image", "Begin download for image (url={}, path={})", url,
                     file_path.string());
 
                 const auto response = cpr::Download(out, cpr::Url {url}, cpr::Redirect {true}, cpr::Timeout {10000});
                 out.close();
 
-                Logger::Info("ui::icon_cache::download_icon", "Download finished (url={}, path={}, status_code={})",
+                Logger::Info("ui::image_cache::download_image", "Download finished (url={}, path={}, status_code={})",
                     url, file_path.string(), response.status_code);
 
                 if (self == nullptr)
@@ -124,28 +123,19 @@ namespace Actinium
 
                 std::filesystem::copy_file(temp_file.GetPath(), file_path);
 
-                Logger::Debug("ui::icon_cache::download_icon", "Saved icon (url={}, path={})", url, file_path.string());
+                Logger::Debug("ui::image_cache::download_image", "Saved image (url={}, path={})", url, file_path.string());
 
                 QT::Invoke(self,
                     [url, self, file_path]()
                     {
                         self->m_pending.erase(url);
-
-                        QIcon icon = LoadIcon(file_path);
-                        self->m_icons.insert({url, icon});
+                        self->m_images.insert({url, LoadImage(file_path)});
                     });
             });
     }
 
-    QIcon IconCache::LoadIcon(const std::filesystem::path& path)
+    QImage ImageCache::LoadImage(const std::filesystem::path& path)
     {
-        const QPixmap pixmap(path.string().c_str());
-
-        if (pixmap.isNull())
-        {
-            return {};
-        }
-
-        return QIcon(pixmap);
+        return QImage(path.string().c_str());
     }
 }

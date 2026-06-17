@@ -1,6 +1,7 @@
 #include "provider_mod_model.h"
 
 #include "core/application.h"
+#include "util/lib/qt.h"
 
 namespace Actinium
 {
@@ -57,9 +58,7 @@ namespace Actinium
                 }
 
                 const auto& preview_media = mod.preview_media.at(0);
-
-                return GApp->GetIconCache()->GetIconFromUrl(
-                    std::format("{}/{}", preview_media.base_url, preview_media.file));
+                return strq(std::format("{}/{}", preview_media.base_url, preview_media.file));
             }
             default:
                 break;

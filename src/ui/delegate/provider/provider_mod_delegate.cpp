@@ -9,8 +9,8 @@
 namespace Actinium
 {
     constexpr auto ITEM_HEIGHT = 60;
-    constexpr auto ICON_ASPECT_RATIO = 16.0f / 9.0f;
-    constexpr auto ICON_MARGIN = 4;
+    constexpr auto IMAGE_ASPECT_RATIO = 16.0f / 9.0f;
+    constexpr auto IMAGE_MARGIN = 4;
     constexpr auto TEXT_MARGIN_LEFT = 5;
     constexpr auto NAME_MARGIN_TOP = 7;
 
@@ -34,21 +34,23 @@ namespace Actinium
             painter->fillRect(opt.rect, QBrush(color));
         }
 
-        const auto icon_width = opt.rect.height() * ICON_ASPECT_RATIO;
+        const auto image_with = opt.rect.height() * IMAGE_ASPECT_RATIO;
+        const auto image_url = index.data(Qt::DecorationRole).toString();
+        const auto image = GApp->GetImageCache()->GetImageFromUrl(qstr(image_url));
 
-        if (!opt.icon.isNull())
+        if (!image.isNull())
         {
-            const auto area = QRect(opt.rect.x() + ICON_MARGIN, opt.rect.y() + ICON_MARGIN,
-                icon_width - ICON_MARGIN * 2, opt.rect.height() - ICON_MARGIN * 2);
+            const auto area = QRect(opt.rect.x() + IMAGE_MARGIN, opt.rect.y() + IMAGE_MARGIN,
+                image_with - IMAGE_MARGIN * 2, opt.rect.height() - IMAGE_MARGIN * 2);
 
             painter->setClipRect(area);
-            QT::PaintIconCoveredInArea(painter, opt.icon, area);
+            QT::PaintImageCoveredInArea(painter, image, area);
             painter->setClipRect(opt.rect);
         }
 
         const auto style = QT::GetCorrectStyle(opt);
         const auto text_rect = opt.rect.adjusted(
-            icon_width + TEXT_MARGIN_LEFT, NAME_MARGIN_TOP, icon_width + TEXT_MARGIN_LEFT, NAME_MARGIN_TOP);
+            image_with + TEXT_MARGIN_LEFT, NAME_MARGIN_TOP, image_with + TEXT_MARGIN_LEFT, NAME_MARGIN_TOP);
 
         style->drawItemText(painter, text_rect, Qt::AlignTop | Qt::AlignLeft, opt.palette, true,
             index.data(Qt::DisplayRole).toString());

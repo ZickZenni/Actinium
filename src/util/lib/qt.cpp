@@ -80,19 +80,18 @@ namespace Actinium::QT
         return result;
     }
 
-    void PaintIconCoveredInArea(QPainter* painter, const QIcon& icon, const QRect& area)
+    void PaintImageCoveredInArea(QPainter* painter, QImage icon, const QRect& area)
     {
         const auto dpr = painter->device()->devicePixelRatioF();
         const auto target_size = area.size() * dpr;
 
-        auto pixmap = icon.pixmap(target_size);
-        pixmap.setDevicePixelRatio(dpr);
+        icon.setDevicePixelRatio(dpr);
 
-        const auto scaled = pixmap.scaled(area.size() * dpr, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        const auto scaled = icon.scaled(area.size() * dpr, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         const auto diff_width = scaled.width() - target_size.width();
         const auto diff_height = scaled.height() - target_size.height();
         const auto source_rect = QRect(QPoint(diff_width / 2, diff_height / 2), target_size);
 
-        painter->drawPixmap(area, scaled, source_rect);
+        painter->drawImage(area, scaled, source_rect);
     }
 }

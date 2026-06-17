@@ -7,39 +7,39 @@
 
 namespace Actinium
 {
-    class IconCache : public QWidget
+    class ImageCache : public QWidget
     {
     public:
-        explicit IconCache(const std::filesystem::path &cache_path);
+        explicit ImageCache(const std::filesystem::path &cache_path);
 
         /**
          * Retrieves an icon from the url.
          */
-        QIcon GetIconFromUrl(const std::string &url);
+        QImage GetImageFromUrl(const std::string &url);
 
         /**
          * Retrieves the placeholder icon.
          */
-        static QIcon GetPlaceholderIcon();
+        static QImage GetPlaceholderImage();
 
     private:
         std::filesystem::path m_cache_path;
-        std::unordered_map<std::string, QIcon> m_icons;
+        std::unordered_map<std::string, QImage> m_images;
         std::unordered_set<std::string> m_pending;
 
         /**
          * Retrieves the path where the icon is going to be stored.
          */
-        std::filesystem::path GetIconPathFromUrl(const std::string &url) const;
+        std::filesystem::path GetImagePathFromUrl(const std::string &url) const;
 
         /**
          * Downloads the icon to the disk.
          */
-        void DownloadIcon(const std::string &url, const std::filesystem::path &file_path);
+        void DownloadImage(const std::string &url, const std::filesystem::path &file_path);
 
         /**
          * Loads the icon from the disk correctly (prevents only having 24x24 size)
          */
-        static QIcon LoadIcon(const std::filesystem::path &path);
+        static QImage LoadImage(const std::filesystem::path &path);
     };
 }
