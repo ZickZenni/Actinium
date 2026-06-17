@@ -10,6 +10,12 @@
 #include <QThreadPool>
 #include <cpr/cpr.h>
 
+#ifdef WIN32
+#ifdef LoadImage
+#undef LoadImage
+#endif
+#endif
+
 namespace Actinium
 {
     ImageCache::ImageCache(const std::filesystem::path& cache_path)

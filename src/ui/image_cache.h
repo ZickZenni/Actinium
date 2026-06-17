@@ -5,6 +5,12 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#ifdef WIN32
+#ifdef LoadImage
+#undef LoadImage
+#endif
+#endif
+
 namespace Actinium
 {
     class ImageCache : public QWidget
