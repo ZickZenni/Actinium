@@ -74,7 +74,9 @@ add_subdirectory(thirdparty/efsw)
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/core/build_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/build/build_config.h")
 
 ### Executable ###
-add_executable(Actinium)
+add_executable(Actinium
+        src/core/download_manager.cpp
+        src/core/download_manager.h)
 
 ### Source ###
 target_sources(Actinium PRIVATE

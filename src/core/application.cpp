@@ -10,6 +10,7 @@
 #include "loader/migoto.h"
 #include "logger.h"
 #include "ui/dialog/launch_instance_dialog.h"
+#include "util/lib/archive.h"
 #include "util/lib/json.h"
 #include "util/lib/qt.h"
 #include "util/software/steam.h"
@@ -107,6 +108,7 @@ namespace Actinium
         , m_file_watcher(new efsw::FileWatcher())
         , m_main_window(nullptr)
         , m_image_cache(nullptr)
+        , m_download_manager(nullptr)
     {
         setStyle(QStyleFactory::create("Fusion"));
         setOrganizationName("ZickZenni");
@@ -118,7 +120,11 @@ namespace Actinium
         Logger::Info("app::startup", "Storage directory is located on {}", GetAppDataPath().string());
 
         m_image_cache = new ImageCache(GetAppDataPath() / "cache" / "images");
+        m_download_manager = new DownloadManager(4);
 
+        connect(m_download_manager, &DownloadManager::DownloadFinished, this, &Application::OnDownloadFinished);
+
+        UpdatePalette();
         LoadConfig();
 
         QList<QCommandLineOption> options;
@@ -326,6 +332,17 @@ namespace Actinium
 #endif
     }
 
+    void Application::DownloadMod(Instance* instance, const Provider::ModInfo& mod, const Provider::File& file) const
+    {
+        Q_CHECK_PTR(instance);
+
+        Instance::QueuedModDownload queued_mod_download;
+        queued_mod_download.id = m_download_manager->Queue(file.url);
+        queued_mod_download.info = mod;
+
+        instance->m_active_downloads.push_back(queued_mod_download);
+    }
+
     std::optional<std::filesystem::path> Application::GetGameExecutable(const std::string& game_id)
     {
         const auto& game = GetGameById(game_id);
@@ -371,6 +388,11 @@ namespace Actinium
     ImageCache* Application::GetImageCache() const
     {
         return m_image_cache;
+    }
+
+    DownloadManager* Application::GetDownloadManager() const
+    {
+        return m_download_manager;
     }
 
     std::filesystem::path Application::GetAppDataPath()
@@ -518,6 +540,106 @@ namespace Actinium
         GetInitialWindowSize(width, height);
 
         m_main_window->resize(width, height);
+    }
+
+    void Application::OnDownloadFinished(const DownloadId id, const std::filesystem::path& file_path) const
+    {
+        for (const auto& instance : m_instances)
+        {
+            auto& active_downloads = instance->m_active_downloads;
+
+            for (auto it = active_downloads.begin(); it != active_downloads.end();)
+            {
+                if (it->id == id)
+                {
+                    const auto& mod = it->info;
+                    const auto mod_directory = instance->GetAbsolutePath() / "mods" / mod.name;
+                    const auto data_directory = mod_directory / "data";
+
+                    std::error_code fs_error;
+                    std::filesystem::create_directories(mod_directory, fs_error);
+                    std::filesystem::create_directories(data_directory, fs_error);
+
+                    ArchiveUtils::ExtractArchive(file_path, data_directory);
+
+                    std::filesystem::remove(file_path, fs_error);
+
+                    it = active_downloads.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+    }
+
+    void Application::UpdatePalette()
+    {
+        constexpr auto MANTLE = 0x282a36;
+        constexpr auto BASE = 0x2D2F3C;
+        constexpr auto CRUST = 0x1d1b22;
+        constexpr auto SURFACE0 = 0x313442;
+        constexpr auto SURFACE1 = 0x3B3D4E;
+        constexpr auto SURFACE2 = 0x44475A;
+        constexpr auto OVERLAY0 = 0x626573;
+        constexpr auto OVERLAY1 = 0x80828D;
+        constexpr auto OVERLAY2 = 0x9EA0A6;
+        constexpr auto TEXT = 0xF8F8F2;
+        constexpr auto PRIMARY = 0xBD93F9;
+        constexpr auto SECONDARY = 0xFF79C6;
+
+        const auto primary_color = QColor(PRIMARY);
+        const auto highlighted_text_color = QColor(primary_color.valueF() > 0.5f ? MANTLE : TEXT);
+        const auto text_color = QColor(TEXT);
+
+        float h, s, v, a;
+        text_color.getHsvF(&h, &s, &v, &a);
+
+        const auto bright_text_color = QColor::fromHsvF(h, s, 1 - v, a);
+
+        auto pal = palette();
+
+        pal.setColor(QPalette::Base, QColor(MANTLE));
+        pal.setColor(QPalette::AlternateBase, QColor(BASE));
+        pal.setColor(QPalette::Window, QColor(BASE));
+        pal.setColor(QPalette::WindowText, QColor(TEXT));
+        pal.setColor(QPalette::PlaceholderText, QColor(OVERLAY1));
+        pal.setColor(QPalette::Text, QColor(TEXT));
+        pal.setColor(QPalette::Button, QColor(BASE));
+        pal.setColor(QPalette::ButtonText, QColor(TEXT));
+        pal.setColor(QPalette::BrightText, bright_text_color);
+        pal.setColor(QPalette::ToolTipBase, QColor(MANTLE));
+        pal.setColor(QPalette::ToolTipText, QColor(OVERLAY2));
+        pal.setColor(QPalette::Highlight, primary_color);
+        pal.setColor(QPalette::HighlightedText, highlighted_text_color);
+        pal.setColor(QPalette::Link, QColor(SECONDARY));
+        pal.setColor(QPalette::LinkVisited, QColor(SECONDARY));
+        pal.setColor(QPalette::Light, QColor(CRUST));
+        pal.setColor(QPalette::Midlight, QColor(MANTLE));
+        pal.setColor(QPalette::Mid, QColor(SURFACE0));
+        pal.setColor(QPalette::Dark, QColor(SURFACE1));
+        pal.setColor(QPalette::Shadow, QColor(OVERLAY0));
+
+        pal.setColor(QPalette::Inactive, QPalette::Highlight, QColor(SURFACE0));
+        pal.setColor(QPalette::Inactive, QPalette::Link, QColor(SECONDARY));
+        pal.setColor(QPalette::Inactive, QPalette::LinkVisited, QColor(SECONDARY));
+
+        pal.setColor(QPalette::Disabled, QPalette::WindowText, QColor(OVERLAY1));
+        pal.setColor(QPalette::Disabled, QPalette::Base, QColor(BASE));
+        pal.setColor(QPalette::Disabled, QPalette::AlternateBase, QColor(BASE));
+        pal.setColor(QPalette::Disabled, QPalette::Text, QColor(OVERLAY1));
+        pal.setColor(QPalette::Disabled, QPalette::PlaceholderText, QColor(OVERLAY1));
+        pal.setColor(QPalette::Disabled, QPalette::Button, QColor(BASE));
+        pal.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(OVERLAY1));
+        pal.setColor(QPalette::Disabled, QPalette::BrightText, QColor(MANTLE));
+
+        pal.setColor(QPalette::Disabled, QPalette::Highlight, QColor(SURFACE2));
+        pal.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(SURFACE0));
+        pal.setColor(QPalette::Disabled, QPalette::Link, QColor(SURFACE0));
+        pal.setColor(QPalette::Disabled, QPalette::LinkVisited, QColor(SURFACE0));
+
+        setPalette(pal);
     }
 
     void Application::CreatePaths()

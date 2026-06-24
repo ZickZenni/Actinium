@@ -1,11 +1,13 @@
 #pragma once
 
 #include "base_window.h"
+#include "core/download_manager.h"
 #include "instance/instance.h"
 #include "ui/model/provider/provider_mod_model.h"
 
 #include <QComboBox>
 #include <QListView>
+#include <QPushButton>
 #include <QTextBrowser>
 #include <QTimer>
 
@@ -24,7 +26,7 @@ namespace Actinium
         ProviderModModel *m_model;
         QListView *m_view;
         QTextBrowser *m_mod_description;
-        QComboBox* m_mod_file_selector;
+        QPushButton* m_download_button;
         QLineEdit* m_search_field;
         Provider* m_current_provider;
         uint16_t m_current_page;
@@ -32,6 +34,8 @@ namespace Actinium
         bool m_end_of_list;
         bool m_ready_to_scroll_search;
         QTimer* m_search_field_timer;
+        std::unordered_map<uint32_t, Provider::ModInfo> m_mod_cache;
+        std::unordered_set<DownloadId> m_active_downloads;
 
         void OnSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
@@ -40,6 +44,8 @@ namespace Actinium
         void OnSearchFieldChanged(const QString &text) const;
 
         void OnSearchFieldTimerTimeout();
+
+        void OnClickDownload();
 
         void Search();
 

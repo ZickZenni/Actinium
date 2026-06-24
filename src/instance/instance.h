@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core/download_manager.h"
 #include "game/game.h"
 #include "installed_mod.h"
 
@@ -74,10 +75,17 @@ namespace Actinium
             efsw::Action action, const std::string &old_file_name) override;
 
     private:
+        struct QueuedModDownload
+        {
+            DownloadId id;
+            Provider::ModInfo info;
+        };
+
         std::string m_directory_name;
         Game *m_game;
         std::vector<InstalledMod> m_installed_mods;
         efsw::WatchID m_mods_folder_watch_id;
+        std::vector<QueuedModDownload> m_active_downloads;
 
         /**
          * Adds a new mod to the instance.

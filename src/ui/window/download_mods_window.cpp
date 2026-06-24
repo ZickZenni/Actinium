@@ -1,6 +1,7 @@
 // ReSharper disable CppDFAMemoryLeak
 #include "download_mods_window.h"
 
+#include "core/application.h"
 #include "core/logger.h"
 #include "ui/delegate/provider/provider_mod_delegate.h"
 #include "util/lib/qt.h"
@@ -17,6 +18,8 @@ namespace Actinium
         : BaseWindow(parent)
         , m_instance(instance)
         , m_current_page(0)
+        , m_waiting_for_response(false)
+        , m_end_of_list(false)
         , m_ready_to_scroll_search(true)
     {
         setObjectName("DownloadModsWindow");
@@ -49,9 +52,11 @@ namespace Actinium
         m_mod_description->setReadOnly(true);
         m_mod_description->setOpenExternalLinks(true);
 
-        m_mod_file_selector = new QComboBox(this);
-        m_mod_file_selector->setObjectName("ModFileSelector");
-        m_mod_file_selector->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+        m_download_button = new QPushButton("Download", this);
+        m_download_button->setObjectName("DownloadButton");
+        m_download_button->setEnabled(false);
+
+        connect(m_download_button, &QPushButton::clicked, this, &DownloadModsWindow::OnClickDownload);
 
         layout->addWidget(m_view);
         layout->addWidget(m_mod_description);
@@ -69,7 +74,7 @@ namespace Actinium
 
         main_layout->addWidget(m_search_field, 0, Qt::AlignmentFlag::AlignLeft | Qt::AlignmentFlag::AlignVCenter);
         main_layout->addLayout(layout);
-        main_layout->addWidget(m_mod_file_selector, 0, Qt::AlignmentFlag::AlignRight | Qt::AlignmentFlag::AlignVCenter);
+        main_layout->addWidget(m_download_button, 0, Qt::AlignmentFlag::AlignRight | Qt::AlignmentFlag::AlignVCenter);
         main_layout->setContentsMargins(0, 0, 0, 0);
 
         const auto& providers = m_instance->GetGame()->providers;
@@ -95,7 +100,7 @@ namespace Actinium
     {
         const auto selected_indexes = selected.indexes();
 
-        if (selected_indexes.size() == 0)
+        if (selected_indexes.empty())
         {
             m_mod_description->setPlainText("");
             return;
@@ -104,17 +109,24 @@ namespace Actinium
         const auto selected_index = selected_indexes.at(0);
         const auto mod_id = static_cast<uint32_t>(selected_index.internalId());
 
+        if (m_mod_cache.contains(mod_id))
+        {
+            const auto& mod_info = m_mod_cache.at(mod_id);
+
+            m_mod_description->setHtml(QString::fromStdString(mod_info.description));
+            m_download_button->setEnabled(true);
+
+            return;
+        }
+
+        m_mod_description->setPlainText("");
         m_current_provider->GetMod(mod_id,
             QT::QueuedCallback(this,
-                [](const DownloadModsWindow* self, const Provider::ModInfo& mod_info)
+                [](DownloadModsWindow* self, const Provider::ModInfo& mod_info)
                 {
+                    self->m_mod_cache.insert({mod_info.id, mod_info});
                     self->m_mod_description->setHtml(QString::fromStdString(mod_info.description));
-                    self->m_mod_file_selector->clear();
-
-                    for (const auto& file : mod_info.files)
-                    {
-                        self->m_mod_file_selector->addItem(QString::fromStdString(file.name));
-                    }
+                    self->m_download_button->setEnabled(true);
                 }));
     }
 
@@ -145,6 +157,39 @@ namespace Actinium
         Search();
     }
 
+    void DownloadModsWindow::OnClickDownload()
+    {
+        const auto& indices = m_view->selectionModel()->selectedIndexes();
+
+        if (indices.empty())
+        {
+            return;
+        }
+
+        const auto index = indices.at(0);
+        const auto mod_id = static_cast<uint32_t>(index.internalId());
+
+        if (!m_mod_cache.contains(mod_id))
+        {
+            return;
+        }
+
+        const auto& mod_info = m_mod_cache.at(mod_id);
+
+        if (mod_info.files.empty())
+        {
+            return;
+        }
+
+        if (mod_info.files.size() == 1)
+        {
+            GApp->DownloadMod(m_instance, mod_info, mod_info.files.at(0));
+        }
+        else
+        {
+        }
+    }
+
     void DownloadModsWindow::Search()
     {
         if (m_waiting_for_response || m_end_of_list || !m_ready_to_scroll_search)
@@ -153,7 +198,8 @@ namespace Actinium
         }
 
         m_waiting_for_response = true;
-        m_current_provider->GetMods(qstr(m_search_field->text()), m_current_page, QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
+        m_current_provider->GetMods(qstr(m_search_field->text()), m_current_page,
+            QT::QueuedCallback(this, &DownloadModsWindow::OnSearchResponse));
     }
 
     void DownloadModsWindow::OnSearchResponse(DownloadModsWindow* self, const Provider::SearchResponse& response)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "download_manager.h"
 #include "game/game.h"
 #include "instance/instance.h"
 #include "ui/image_cache.h"
@@ -51,6 +52,8 @@ namespace Actinium
          */
         int LaunchGameWithLoader(const Instance *instance, QWidget *parent = nullptr);
 
+        void DownloadMod(Instance* instance, const Provider::ModInfo& mod, const Provider::File &file) const;
+
         /**
          * Retrieves the path to the game's executable file.
          * Has no value if the user does not select the executable or something went wrong.
@@ -61,6 +64,11 @@ namespace Actinium
          * Retrieves the image cache of the application.
          */
         [[nodiscard]] ImageCache* GetImageCache() const;
+
+        /**
+         * Retrieves the download manager of the application.
+         */
+        [[nodiscard]] DownloadManager* GetDownloadManager() const;
 
         /**
          * Retrieves the appdata path for the application.
@@ -91,6 +99,7 @@ namespace Actinium
         std::vector<Instance *> m_instances;
         MainWindow *m_main_window;
         ImageCache* m_image_cache;
+        DownloadManager* m_download_manager;
 
         /**
          * Loads the configuration settings for the application.
@@ -116,6 +125,10 @@ namespace Actinium
          * Prepares everything UI-related.
          */
         void PrepareUI();
+
+        void OnDownloadFinished(DownloadId id, const std::filesystem::path& file_path) const;
+
+        static void UpdatePalette();
 
         /**
          * Creates all required directories.
