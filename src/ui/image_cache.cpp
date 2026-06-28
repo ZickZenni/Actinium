@@ -59,6 +59,9 @@ namespace Actinium
 
     void ImageCache::DownloadImage(const std::string& url, const std::filesystem::path& file_path)
     {
+        static const auto REDIRECT_OPTION = cpr::Redirect {true};
+        static const auto CONNECT_TIMEOUT = cpr::ConnectTimeout {10000};
+
         if (m_pending.contains(url))
         {
             return;
@@ -87,7 +90,7 @@ namespace Actinium
                 Logger::Info("ui::image_cache::download_image", "Begin download for image (url={}, path={})", url,
                     file_path.string());
 
-                const auto response = cpr::Download(out, cpr::Url {url}, cpr::Redirect {true}, cpr::Timeout {10000});
+                const auto response = cpr::Download(out, cpr::Url {url}, REDIRECT_OPTION, CONNECT_TIMEOUT);
                 out.close();
 
                 Logger::Info("ui::image_cache::download_image", "Download finished (url={}, path={}, status_code={})",
@@ -100,6 +103,9 @@ namespace Actinium
 
                 if (response.error)
                 {
+                    Logger::Error("ui::image_cache::download_image", "Failed to download image (url={}, error={})", url,
+                        response.error.message);
+
                     QT::Invoke(self,
                         [url, self]()
                         {
@@ -111,6 +117,9 @@ namespace Actinium
 
                 if (response.status_code < 200 || response.status_code >= 300)
                 {
+                    Logger::Error("ui::image_cache::download_image",
+                        "Failed to download image (url={}, status_code={})", url, response.status_code);
+
                     QT::Invoke(self,
                         [url, self]()
                         {
