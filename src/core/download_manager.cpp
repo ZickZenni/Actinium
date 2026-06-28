@@ -30,6 +30,7 @@ namespace Actinium
     DownloadId DownloadManager::Queue(const std::string& url)
     {
         static const auto REDIRECT_OPTION = cpr::Redirect {true};
+        static const auto CONNECT_TIMEOUT = cpr::ConnectTimeout {10000};
 
         QueuedDownload entry;
         entry.id = ++m_next_id;
@@ -73,7 +74,7 @@ namespace Actinium
                         std::ofstream out(file_path, std::ios::binary);
 
                         const auto url = cpr::Url {download.url};
-                        const auto response = cpr::Download(out, url, REDIRECT_OPTION);
+                        const auto response = cpr::Download(out, url, REDIRECT_OPTION, CONNECT_TIMEOUT);
                         out.close();
 
                         if (response.error || response.status_code < 200 || response.status_code >= 300)
